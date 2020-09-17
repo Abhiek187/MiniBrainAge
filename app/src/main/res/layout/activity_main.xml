@@ -5,13 +5,17 @@
     android:id="@+id/layoutPage"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#DDD"
     tools:context=".MainActivity">
 
     <Button
         android:id="@+id/buttonClassify"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:background="#8BC34A"
         android:text="@string/button_classify"
         app:layout_constraintEnd_toStartOf="@+id/buttonReset"
         app:layout_constraintStart_toStartOf="parent"
@@ -21,9 +25,24 @@
         android:id="@+id/buttonReset"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:background="#FF5722"
         android:text="@string/button_reset"
         app:layout_constraintBaseline_toBaselineOf="@+id/buttonClassify"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/buttonClassify" />
+
+    <TextView
+        android:id="@+id/textViewMath"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Display2"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:text="72 / 9 = ?" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
