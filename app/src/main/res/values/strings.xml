@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Mini Brain Age</string>
+    <string name="button_classify">Classify</string>
+    <string name="button_reset">Reset</string>
+</resources>
