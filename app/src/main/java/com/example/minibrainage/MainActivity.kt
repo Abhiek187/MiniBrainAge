@@ -6,10 +6,12 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.core.view.drawToBitmap
 import com.example.minibrainage.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
     private var answer = 0
+    private val digitClassifier = DigitClassifier(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,7 +30,7 @@ class MainActivity : AppCompatActivity() {
         // Add CanvasView to ConstraintLayout
         val canvasView = CanvasView(this)
         canvasView.id = View.generateViewId() // generate id to apply constraints
-        canvasView.setBackgroundColor(Color.WHITE)
+        canvasView.setBackgroundColor(Color.BLACK)
         layoutPage.addView(canvasView)
 
         // Make CanvasView square, height = phone width - margins, middle of screen
@@ -46,8 +48,23 @@ class MainActivity : AppCompatActivity() {
         constraintSet.setDimensionRatio(canvasView.id, "1:1")
         constraintSet.applyTo(layoutPage)
 
+        // Initialize the digit classifier
+        digitClassifier.initialize().addOnFailureListener { err ->
+            println("Failed to set up digit classifier: ${err.localizedMessage}")
+        }
+
         buttonClassify.setOnClickListener {
             // Classify the number drawn
+            if (digitClassifier.isInitialized) {
+                digitClassifier.classifyAsync(canvasView.drawToBitmap())
+                    .addOnSuccessListener { result ->
+                        Toast.makeText(this, "You wrote $result", Toast.LENGTH_SHORT).show()
+                    }
+                    .addOnFailureListener { err ->
+                        Toast.makeText(this, "Couldn't classify drawing: ${err.localizedMessage}", Toast.LENGTH_SHORT).show()
+                    }
+            }
+
             Toast.makeText(this, "The correct answer is $answer.", Toast.LENGTH_SHORT).show()
         }
 
@@ -57,6 +74,11 @@ class MainActivity : AppCompatActivity() {
             // Generate a new equation
             textViewMath.text = generateRandomEquation()
         }
+    }
+
+    override fun onDestroy() {
+        digitClassifier.close() // stop the classifier before closing the app
+        super.onDestroy()
     }
 
     private fun generateRandomEquation(): String {

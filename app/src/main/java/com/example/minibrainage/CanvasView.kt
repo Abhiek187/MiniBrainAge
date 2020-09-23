@@ -15,7 +15,7 @@ class CanvasView(context: Context): View(context) {
     init {
         paint.style = Paint.Style.STROKE
         paint.strokeWidth = 10f
-        paint.color = Color.BLACK
+        paint.color = Color.WHITE
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
