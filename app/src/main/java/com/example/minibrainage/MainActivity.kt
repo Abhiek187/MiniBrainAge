@@ -58,15 +58,18 @@ class MainActivity : AppCompatActivity() {
             if (digitClassifier.isInitialized) {
                 digitClassifier.classifyAsync(canvasView.drawToBitmap())
                     .addOnSuccessListener { result ->
-                        Toast.makeText(this, result, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "$result The correct answer is $answer.",
+                            Toast.LENGTH_LONG).show()
+                        // Clear the canvas
+                        canvasView.clear()
+                        // Generate a new equation
+                        textViewMath.text = generateRandomEquation()
                     }
                     .addOnFailureListener { err ->
                         Toast.makeText(this,"Couldn't classify drawing: ${err.localizedMessage}",
                             Toast.LENGTH_SHORT).show()
                     }
             }
-
-            Toast.makeText(this, "The correct answer is $answer.", Toast.LENGTH_SHORT).show()
         }
 
         buttonReset.setOnClickListener {
