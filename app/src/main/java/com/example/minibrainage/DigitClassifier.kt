@@ -93,10 +93,12 @@ class DigitClassifier(private val context: Context) {
 
         // Post-processing: find the digit that has the highest probability
         // and return it a human-readable string.
-        val result = output[0]
-        val maxIndex = result.indices.maxByOrNull { result[it] } ?: -1
+        val result = output[0].mapIndexed { index, conf -> Pair(index, conf) }
+            .sortedByDescending { (_, value) -> value }
 
-        return "Prediction Result: %d\nConfidence: %2f".format(maxIndex, result[maxIndex])
+        val conf1 = String.format("%.2f", result[0].second * 100)
+        val conf2 = String.format("%.2f", result[1].second * 100)
+        return "That's either ${result[0].first} ($conf1%) or ${result[1].first} ($conf2%)."
     }
 
     fun classifyAsync(bitmap: Bitmap): Task<String> {

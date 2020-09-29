@@ -14,7 +14,7 @@ class CanvasView(context: Context): View(context) {
 
     init {
         paint.style = Paint.Style.STROKE
-        paint.strokeWidth = 10f
+        paint.strokeWidth = 20f
         paint.color = Color.WHITE
     }
 

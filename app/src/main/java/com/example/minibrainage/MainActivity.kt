@@ -58,10 +58,11 @@ class MainActivity : AppCompatActivity() {
             if (digitClassifier.isInitialized) {
                 digitClassifier.classifyAsync(canvasView.drawToBitmap())
                     .addOnSuccessListener { result ->
-                        Toast.makeText(this, "You wrote $result", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, result, Toast.LENGTH_SHORT).show()
                     }
                     .addOnFailureListener { err ->
-                        Toast.makeText(this, "Couldn't classify drawing: ${err.localizedMessage}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this,"Couldn't classify drawing: ${err.localizedMessage}",
+                            Toast.LENGTH_SHORT).show()
                     }
             }
 
@@ -82,34 +83,32 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun generateRandomEquation(): String {
-        // Make the first number, second number, and operator random and save the answer
-        val a = (0..99).random() // 0-99
-        val b = (0..99).random()
-        val op: Char
+        /* Start with an equation: a op b = c,
+         * where a is in [-99, 99], op is in {+, -, *}, and b is in [0, 9].
+         * Then apply the opposite op (oop) to get the following equation: b = c oop a.
+         * This way, the result is always a single digit number.
+         * Ex: 4 + 8 = 12, 8 = 12 - 4, -14 - 7 = -21, 7 = -14 + 21, 20 * 3 = 60, 3 = 60 / 20
+         */
+        val a = (-99..99).random() // -99-99
+        answer = (0..9).random() // 0-9
+        val c: Int
 
-        when ((0..4).random()) {
+        return when ((0..2).random()) {
             0 -> {
-                op = '+'
-                answer = a + b
+                // op = '+'
+                c = a + answer
+                "$c ${if (a >= 0) "- $a" else "+ ${-a}"} = ?"
             }
             1 -> {
-                op = '-'
-                answer = a - b
-            }
-            2 -> {
-                op = '*'
-                answer = a * b
-            }
-            3 -> {
-                op = '/'
-                answer = a / b
+                // op = '-'
+                c = a - answer
+                "$a ${if (c >= 0) "- $c" else "+ ${-c}"} = ?"
             }
             else -> {
-                op = '%'
-                answer = a % b
+                // op = '*'
+                c = a * answer
+                "$c / $a = ?"
             }
         }
-
-        return "$a $op $b = ?"
     }
 }
