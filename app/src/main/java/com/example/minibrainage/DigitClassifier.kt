@@ -73,7 +73,7 @@ class DigitClassifier(private val context: Context) {
         return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength)
     }
 
-    private fun classify(bitmap: Bitmap): String {
+    private fun classify(bitmap: Bitmap): List<Pair<Int, Float>> {
         check(isInitialized) { "TF Lite Interpreter is not initialized yet." }
 
         // Pre-processing: resize the input image to match the model input shape.
@@ -91,18 +91,14 @@ class DigitClassifier(private val context: Context) {
         // Run inference with the input data.
         interpreter?.run(byteBuffer, output)
 
-        // Post-processing: find the digit that has the highest probability
-        // and return it a human-readable string.
+        // Return the two digits with the highest probability
         val result = output[0].mapIndexed { index, conf -> Pair(index, conf) }
             .sortedByDescending { (_, value) -> value }
-
-        val conf1 = String.format("%.2f", result[0].second * 100)
-        val conf2 = String.format("%.2f", result[1].second * 100)
-        return "That's either ${result[0].first} ($conf1%) or ${result[1].first} ($conf2%)."
+        return result.take(2)
     }
 
-    fun classifyAsync(bitmap: Bitmap): Task<String> {
-        val task = TaskCompletionSource<String>()
+    fun classifyAsync(bitmap: Bitmap): Task<List<Pair<Int, Float>>> {
+        val task = TaskCompletionSource<List<Pair<Int, Float>>>()
         executorService.execute {
             val result = classify(bitmap)
             task.setResult(result)

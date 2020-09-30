@@ -2,4 +2,8 @@
     <string name="app_name">Mini Brain Age</string>
     <string name="button_classify">Classify</string>
     <string name="button_reset">Reset</string>
+    <string name="score">Score: %1$d</string>
+    <string name="equation">%1$d %2$s %3$d = %4$s</string>
+    <string name="correct">Correct</string>
+    <string name="wrong">Wrong</string>
 </resources>
