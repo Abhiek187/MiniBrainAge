@@ -1,21 +1,32 @@
 package com.example.minibrainage
 
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.text.Html
+import android.view.Gravity
 import android.view.View
+import android.widget.LinearLayout
+import android.widget.PopupWindow
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.drawToBitmap
 import com.example.minibrainage.databinding.ActivityMainBinding
+import com.example.minibrainage.databinding.PopupPlayAgainBinding
 import kotlin.math.floor
 import kotlin.math.roundToInt
 
 class MainActivity : AppCompatActivity() {
     private var answer = 0
     private val digitClassifier = DigitClassifier(this)
+    private var timer: CountDownTimer? = null
+    private lateinit var layoutPage: ConstraintLayout
+    private lateinit var canvasView: CanvasView
+    private lateinit var textViewTimer: TextView
     private lateinit var textViewScore: TextView
     private lateinit var textViewMath: TextView
 
@@ -26,25 +37,34 @@ class MainActivity : AppCompatActivity() {
             textViewScore.text = getString(R.string.score, value)
         }
 
+    private var oldTextColor = 0 // color code
+    private var remainingTime = 60000L
+    private var resumeTime = remainingTime
+    private var highScore = 0
+    private var gameOver = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         // UI elements
-        val layoutPage = binding.layoutPage
+        layoutPage = binding.layoutPage
         val buttonClassify = binding.buttonClassify
         val buttonReset = binding.buttonReset
-        val textViewTimer = binding.textViewTimer
+        textViewTimer = binding.textViewTimer
         textViewScore = binding.textViewScore
         textViewMath = binding.textViewMath
         val imageViewCheck = binding.imageViewCheck
+
+        oldTextColor = textViewTimer.currentTextColor
+        textViewScore.text = getString(R.string.score, score) // show initial score
 
         // Generate a random math equation to solve
         generateRandomEquation()
 
         // Add CanvasView to ConstraintLayout
-        val canvasView = CanvasView(this)
+        canvasView = CanvasView(this)
         canvasView.id = View.generateViewId() // generate id to apply constraints
         canvasView.setBackgroundColor(Color.BLACK)
         layoutPage.addView(canvasView)
@@ -89,7 +109,7 @@ class MainActivity : AppCompatActivity() {
 
         buttonClassify.setOnClickListener {
             // Classify the number drawn
-            if (digitClassifier.isInitialized) {
+            if (digitClassifier.isInitialized && !gameOver) {
                 digitClassifier.classifyAsync(canvasView.drawToBitmap())
                     .addOnSuccessListener { result ->
                         val (num1, conf1) = result[0]
@@ -140,25 +160,57 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Create a 1-minute timer
-        val timer = object: CountDownTimer(60000, 1000) {
-            override fun onTick(msRemain: Long) {
-                val seconds = floor(msRemain / 1000.0).roundToInt()
-                val minutes = seconds / 60
-                textViewTimer.text = String.format("%01d:%02d", minutes, seconds)
-            }
+        startTimer(60000)
+    }
 
-            override fun onFinish() {
-                Toast.makeText(applicationContext, "Time's up!", Toast.LENGTH_SHORT).show()
-                textViewTimer.text = String.format("0:00")
-            }
+    override fun onPause() {
+        super.onPause()
+        // Since remainingTime continues to tick, use another variable instead
+        resumeTime = remainingTime
+        timer?.cancel() // stop the timer
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        if (!gameOver) {
+            startTimer(resumeTime) // resume with the same number of seconds remaining
         }
-
-        timer.start()
     }
 
     override fun onDestroy() {
         digitClassifier.close() // stop the classifier before closing the app
         super.onDestroy()
+    }
+
+    private fun startTimer(milliseconds: Long) {
+        timer?.cancel() // make sure a timer instance isn't already running
+
+        timer = object: CountDownTimer(milliseconds, 1000) {
+            override fun onTick(msRemain: Long) {
+                remainingTime = msRemain
+                val seconds = floor(msRemain / 1000.0).roundToInt()
+                val minutes = seconds / 60
+
+                if (seconds <= 10) {
+                    textViewTimer.setTextColor(Color.RED)
+                }
+
+                textViewTimer.text = getString(R.string.time, minutes, seconds)
+            }
+
+            override fun onFinish() {
+                gameOver = true
+                Toast.makeText(applicationContext, "Time's up!", Toast.LENGTH_SHORT).show()
+                textViewTimer.text = getString(R.string.time, 0, 0)
+                textViewTimer.setTextColor(oldTextColor) // it's not black
+
+                // Show the play again popup
+                showPopup()
+            }
+        }
+
+        timer?.start()
     }
 
     private fun generateRandomEquation() {
@@ -196,6 +248,48 @@ class MainActivity : AppCompatActivity() {
                 c = a * answer
                 getString(R.string.equation, c, '/', a, '?')
             }
+        }
+    }
+
+    private fun showPopup() {
+        val width = LinearLayout.LayoutParams.MATCH_PARENT
+        val height = LinearLayout.LayoutParams.WRAP_CONTENT
+        val popupView = PopupPlayAgainBinding.inflate(layoutInflater)
+        val popupWindow = PopupWindow(popupView.root, width, height)
+        popupWindow.showAtLocation(layoutPage, Gravity.CENTER, 0, 0)
+
+        val textViewHighScore = popupView.textViewHighScore
+        val buttonPlayAgain = popupView.buttonPlayAgain
+
+        // Show the highest score in this session
+        if (score > highScore) {
+            textViewHighScore.text = getString(R.string.high_score, score)
+            // Make additional text red
+            if (Build.VERSION.SDK_INT < 24) {
+                @Suppress("DEPRECATION")
+                textViewHighScore.append(
+                    Html.fromHtml("&nbsp;<font color=\"red\">New record!</font>"))
+            } else {
+                textViewHighScore.append(
+                    Html.fromHtml("&nbsp;<font color=\"red\">New record!</font>",
+                        Html.FROM_HTML_MODE_COMPACT))
+            }
+
+            highScore = score
+        } else {
+            textViewHighScore.text = getString(R.string.high_score, highScore)
+        }
+
+        // Don't let user tap outside the area until they play again
+        buttonPlayAgain.setOnClickListener {
+            // Reset the game
+            canvasView.clear()
+            generateRandomEquation()
+            score = 0
+
+            gameOver = false
+            popupWindow.dismiss()
+            startTimer(60000) // restart the timer
         }
     }
 }
