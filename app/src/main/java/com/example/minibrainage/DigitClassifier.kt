@@ -3,7 +3,7 @@ package com.example.minibrainage
 import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
-import com.example.minibrainage.ml.MnistAug
+import com.example.minibrainage.ml.Mnist
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.TaskCompletionSource
 import org.tensorflow.lite.DataType
@@ -15,7 +15,7 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 class DigitClassifier(private val context: Context) {
-    private lateinit var model: MnistAug
+    private lateinit var model: Mnist
 
     var isInitialized = false
         private set
@@ -38,7 +38,7 @@ class DigitClassifier(private val context: Context) {
 
     private fun initializeInterpreter() {
         // Load the TF Lite model from the binding.
-        model = MnistAug.newInstance(context)
+        model = Mnist.newInstance(context)
         isInitialized = true
         Log.d(TAG, "Initialized TFLite interpreter.")
     }
@@ -56,17 +56,17 @@ class DigitClassifier(private val context: Context) {
         val byteBuffer = convertBitmapToByteBuffer(resizedImage)
 
         // Create inputs for reference.
-        val inputFeature0 = TensorBuffer.createFixedSize(
+        val inputImageBuffer = TensorBuffer.createFixedSize(
             // [training examples, height, width, channels]
             intArrayOf(1, IMAGE_HEIGHT, IMAGE_WIDTH, PIXEL_SIZE), DataType.FLOAT32)
-        inputFeature0.loadBuffer(byteBuffer)
+        inputImageBuffer.loadBuffer(byteBuffer)
 
         // Run model inference and get the result.
-        val outputs = model.process(inputFeature0)
-        val outputFeature0 = outputs.outputFeature0AsTensorBuffer.floatArray
+        val outputs = model.process(inputImageBuffer)
+        val probabilities = outputs.probabilityAsCategoryList
 
         // Return the two digits with the highest confidence
-        val result = outputFeature0.mapIndexed { index, conf -> Pair(index, conf) }
+        val result = probabilities.map { prob -> Pair(prob.label.toInt(), prob.score) }
             .sortedByDescending { (_, value) -> value }
         return result.take(2)
     }
