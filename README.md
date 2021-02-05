@@ -16,7 +16,7 @@ There are 3 Python files that can be executed after installing the [TensorFlow m
 
 `write_metadata.py` is executed with the following syntax:
 ```
-python3 ./metadata_writer_for_image_classifier.py \
+python3 ./write_metadata.py \
     --model_file=./<path-to>/mnist.tflite \
     --label_file=./labels.txt \
     --export_directory=<output-directory>
