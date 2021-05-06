@@ -1,27 +1,32 @@
 package com.example.minibrainage
 
 import android.content.Context
+import android.content.res.AssetManager
 import android.graphics.Bitmap
 import android.util.Log
-import com.example.minibrainage.ml.Mnist
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.TaskCompletionSource
-import org.tensorflow.lite.DataType
-import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
+import org.tensorflow.lite.Interpreter
+import java.io.FileInputStream
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import java.nio.channels.FileChannel
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 class DigitClassifier(private val context: Context) {
-    private lateinit var model: Mnist
+    private var interpreter: Interpreter? = null
 
     var isInitialized = false
         private set
 
     /** Executor to run inference task in the background. */
     private val executorService: ExecutorService = Executors.newCachedThreadPool()
+
+    private var inputImageWidth: Int = 0 // will be inferred from TF Lite model.
+    private var inputImageHeight: Int = 0 // will be inferred from TF Lite model.
+    private var modelInputSize: Int = 0 // will be inferred from TF Lite model.
 
     fun initialize(): Task<Void> {
         val task = TaskCompletionSource<Void>()
@@ -36,11 +41,36 @@ class DigitClassifier(private val context: Context) {
         return task.task
     }
 
+    @Throws(IOException::class)
     private fun initializeInterpreter() {
-        // Load the TF Lite model from the binding.
-        model = Mnist.newInstance(context)
+        // Load the TF Lite model from the assets folder.
+        val assetManager = context.assets
+        val model = loadModelFile(assetManager, "mnist.tflite")
+        val options = Interpreter.Options()
+        options.setUseNNAPI(true)
+        val interpreter = Interpreter(model, options)
+
+        // Read input shape from model file
+        val inputShape = interpreter.getInputTensor(0).shape()
+        inputImageWidth = inputShape[1]
+        inputImageHeight = inputShape[2]
+        modelInputSize = FLOAT_TYPE_SIZE * inputImageWidth * inputImageHeight * PIXEL_SIZE
+
+        // Finish interpreter initialization
+        this.interpreter = interpreter
+
         isInitialized = true
         Log.d(TAG, "Initialized TFLite interpreter.")
+    }
+
+    @Throws(IOException::class)
+    private fun loadModelFile(assetManager: AssetManager, filename: String): ByteBuffer {
+        val fileDescriptor = assetManager.openFd(filename)
+        val inputStream = FileInputStream(fileDescriptor.fileDescriptor)
+        val fileChannel = inputStream.channel
+        val startOffset = fileDescriptor.startOffset
+        val declaredLength = fileDescriptor.declaredLength
+        return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength)
     }
 
     private fun classify(bitmap: Bitmap): List<Pair<Int, Float>> {
@@ -49,24 +79,20 @@ class DigitClassifier(private val context: Context) {
         // Pre-processing: resize the input image to match the model input shape.
         val resizedImage = Bitmap.createScaledBitmap(
             bitmap,
-            IMAGE_WIDTH,
-            IMAGE_HEIGHT,
+            inputImageWidth,
+            inputImageHeight,
             true
         )
         val byteBuffer = convertBitmapToByteBuffer(resizedImage)
 
-        // Create inputs for reference.
-        val inputImageBuffer = TensorBuffer.createFixedSize(
-            // [training examples, height, width, channels]
-            intArrayOf(1, IMAGE_HEIGHT, IMAGE_WIDTH, PIXEL_SIZE), DataType.FLOAT32)
-        inputImageBuffer.loadBuffer(byteBuffer)
+        // Define an array to store the model output.
+        val output = Array(1) { FloatArray(OUTPUT_CLASSES_COUNT) }
 
-        // Run model inference and get the result.
-        val outputs = model.process(inputImageBuffer)
-        val probabilities = outputs.probabilityAsCategoryList
+        // Run inference with the input data.
+        interpreter?.run(byteBuffer, output)
 
-        // Return the two digits with the highest confidence
-        val result = probabilities.map { prob -> Pair(prob.label.toInt(), prob.score) }
+        // Return the two digits with the highest probability
+        val result = output[0].mapIndexed { index, conf -> Pair(index, conf) }
             .sortedByDescending { (_, value) -> value }
         return result.take(2)
     }
@@ -82,17 +108,16 @@ class DigitClassifier(private val context: Context) {
 
     fun close() {
         executorService.execute {
-            // Release the model resources when no longer used.
-            model.close()
+            interpreter?.close()
             Log.d(TAG, "Closed TFLite interpreter.")
         }
     }
 
     private fun convertBitmapToByteBuffer(bitmap: Bitmap): ByteBuffer {
-        val byteBuffer = ByteBuffer.allocateDirect(MODEL_SIZE)
+        val byteBuffer = ByteBuffer.allocateDirect(modelInputSize)
         byteBuffer.order(ByteOrder.nativeOrder())
 
-        val pixels = IntArray(IMAGE_WIDTH * IMAGE_HEIGHT)
+        val pixels = IntArray(inputImageWidth * inputImageHeight)
         bitmap.getPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
 
         for (pixelValue in pixels) {
@@ -113,8 +138,7 @@ class DigitClassifier(private val context: Context) {
 
         private const val FLOAT_TYPE_SIZE = 4
         private const val PIXEL_SIZE = 1
-        private const val IMAGE_WIDTH = 28
-        private const val IMAGE_HEIGHT = 28
-        private const val MODEL_SIZE = FLOAT_TYPE_SIZE * IMAGE_WIDTH * IMAGE_HEIGHT * PIXEL_SIZE
+
+        private const val OUTPUT_CLASSES_COUNT = 10
     }
 }
