@@ -3,6 +3,7 @@ package com.example.minibrainage
 import android.content.Context
 import android.content.res.AssetManager
 import android.graphics.Bitmap
+import android.os.Build
 import android.util.Log
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.TaskCompletionSource
@@ -47,7 +48,14 @@ class DigitClassifier(private val context: Context) {
         val assetManager = context.assets
         val model = loadModelFile(assetManager, "mnist.tflite")
         val options = Interpreter.Options()
-        options.setUseNNAPI(true)
+
+        // Initialize interpreter with NNAPI delegate for Android Pie or above
+        // For some reason, it doesn't work with Android S
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
+            && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            options.setUseNNAPI(true)
+        }
+
         val interpreter = Interpreter(model, options)
 
         // Read input shape from model file
