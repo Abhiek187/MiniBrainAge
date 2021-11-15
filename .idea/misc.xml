@@ -9,11 +9,13 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/Users/achau/AndroidStudioProjects/MiniBrainAge/app/src/main/res/layout/activity_main.xml" value="0.12364130434782608" />
+        <entry key="app/src/main/res/layout/activity_main.xml" value="0.24427083333333333" />
+        <entry key="app/src/main/res/layout/popup_play_again.xml" value="0.24427083333333333" />
       </map>
     </option>
   </component>
   <component name="ExternalStorageConfigurationManager" enabled="true" />
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>
   <component name="ProjectType">
