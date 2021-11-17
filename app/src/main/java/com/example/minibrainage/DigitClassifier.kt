@@ -50,7 +50,7 @@ class DigitClassifier(private val context: Context) {
         val options = Interpreter.Options()
 
         // Initialize interpreter with NNAPI delegate for Android Pie or above
-        // For some reason, it doesn't work with Android S
+        // For some reason, it doesn't work on Android S
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
             && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
             options.setUseNNAPI(true)
