@@ -52,10 +52,11 @@
         android:contentDescription="@string/sign_in"
         android:minWidth="48dp"
         android:minHeight="48dp"
+        android:scaleType="fitCenter"
         app:layout_constraintEnd_toStartOf="@+id/textViewScore"
         app:layout_constraintStart_toEndOf="@+id/textViewTimer"
         app:layout_constraintTop_toBottomOf="@+id/buttonClassify"
-        app:srcCompat="@drawable/googleg_standard_color_18" />
+        app:srcCompat="@drawable/googleg_disabled_color_18" />
 
     <TextView
         android:id="@+id/textViewScore"

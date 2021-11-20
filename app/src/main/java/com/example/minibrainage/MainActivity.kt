@@ -28,7 +28,7 @@ class MainActivity : AppCompatActivity() {
     // Timer variables
     private var timer: CountDownTimer? = null
     private var oldTextColor = 0 // color code
-    private val startTime = 5000L // TODO: change back
+    private val startTime = 60000L
     private var remainingTime = startTime
     private var resumeTime = remainingTime
 

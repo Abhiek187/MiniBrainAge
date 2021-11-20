@@ -14,24 +14,45 @@ import com.google.android.gms.games.leaderboard.LeaderboardVariant
 
 class PlayServices(private var activity: Activity, private var buttonGoogle: ImageButton) {
     // Holds all methods related to Google Play Services
-    private var context = activity.applicationContext
+    private val context = activity.applicationContext
     private val prefs = SharedPrefs(context)
-    private var refusedSignIn = false // if true, don't prompt the player to sign in
     private var signedInAccount: GoogleSignInAccount? = null
+    private val leaderboardIntentKey = "openLeaderboards"
 
     init {
         buttonGoogle.setOnClickListener {
             // If the user is signed out, sign them in, otherwise sign them out
             if (signedInAccount == null) {
-                refusedSignIn = false
-                signInSilently()
+                signInSilently(withPrompt = true)
             } else {
                 signOut()
             }
         }
     }
 
-    fun signInSilently() {
+    private fun onSignedIn(account: GoogleSignInAccount, openLeaderboard: Boolean) {
+        // Tasks to perform when the user is signed in
+        signedInAccount = account
+        // Show in color that the user signed in
+        buttonGoogle.setImageResource(R.drawable.googleg_standard_color_18)
+        buttonGoogle.contentDescription = context.getString(R.string.sign_out)
+
+        // Show a popup of the user connecting to Play Games
+        val gamesClient = Games.getGamesClient(context, account)
+        gamesClient.setViewForPopups(activity.findViewById(android.R.id.content))
+        // Backup in case the popup doesn't show
+        Toast.makeText(context, "Signed in to Google Play Games", Toast.LENGTH_SHORT).show()
+
+        // Synchronize the local high score and the leaderboards high score
+        syncLeaderboardScore()
+
+        if (openLeaderboard) {
+            // To be called if the user signs in after tapping the leaderboards button
+            openLeaderboards()
+        }
+    }
+
+    fun signInSilently(withPrompt: Boolean=false, withLeaderboard: Boolean=false) {
         // Sign in to Google in the background, intervene if necessary
         val signInOptions = GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN
         val account = GoogleSignIn.getLastSignedInAccount(context)
@@ -39,39 +60,31 @@ class PlayServices(private var activity: Activity, private var buttonGoogle: Ima
         if (GoogleSignIn.hasPermissions(account, *signInOptions.scopeArray)) {
             // Already signed in.
             // The signed in account is stored in the 'account' variable.
-            signedInAccount = account
-            buttonGoogle.contentDescription = context.getString(R.string.sign_out)
-//            val gamesClient = Games.getGamesClient(this, signedInAccount!!)
-//            gamesClient.setViewForPopups(findViewById(android.R.id.content))
-            Toast.makeText(context, "Signed in to Google", Toast.LENGTH_SHORT).show()
-            updateHighScoreFromLeaderboards()
+            onSignedIn(account!!, withLeaderboard)
         } else {
             // Haven't been signed-in before. Try the silent sign-in first.
             val signInClient = GoogleSignIn.getClient(context, signInOptions)
             signInClient.silentSignIn().addOnCompleteListener(activity) { task ->
                 if (task.isSuccessful) {
                     // The signed in account is stored in the task's result.
-                    signedInAccount = task.result
-                    buttonGoogle.contentDescription = context.getString(R.string.sign_out)
-                    val gamesClient = Games.getGamesClient(context, task.result)
-                    gamesClient.setViewForPopups(activity.findViewById(android.R.id.content))
-                    updateHighScoreFromLeaderboards()
-                    //Toast.makeText(this, "Signed in to Google", Toast.LENGTH_SHORT).show()
-                } else if (!refusedSignIn) {
-                    // Don't constantly prompt the user to sign in to Google Play Games
-                    // Player will need to sign-in explicitly using via UI.
-                    startSignInIntent()
+                    onSignedIn(task.result, withLeaderboard)
+                } else if (withPrompt) {
+                    /* If the user can't be signed in automatically, don't prompt them unless they
+                     * want to view the leaderboards or press the sign-in button
+                     */
+                    startSignInIntent(withLeaderboard)
                 }
             }
         }
     }
 
-    private fun startSignInIntent() {
+    private fun startSignInIntent(openLeaderboard: Boolean) {
         val signInClient = GoogleSignIn.getClient(
             context,
             GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN
         )
         val intent = signInClient.signInIntent
+        intent.putExtra(leaderboardIntentKey, openLeaderboard)
         signInResultLauncher.launch(intent)
     }
 
@@ -83,12 +96,15 @@ class PlayServices(private var activity: Activity, private var buttonGoogle: Ima
         signInClient.signOut().addOnCompleteListener(activity) {
             // At this point, the user is signed out.
             signedInAccount = null
+            // Fade the Google logo to show that the user isn't signed in
+            buttonGoogle.setImageResource(R.drawable.googleg_disabled_color_18)
             buttonGoogle.contentDescription = context.getString(R.string.sign_in)
-            Toast.makeText(context, "Signed out of Google", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Signed out of Google Play Games", Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun updateHighScoreFromLeaderboards() {
+    private fun syncLeaderboardScore() {
+        // Ensure that the local and leaderboards high score match
         if (signedInAccount == null) return
         val maxResults = 1
         val leaderboardID = context.getString(R.string.leaderboard_id)
@@ -103,9 +119,12 @@ class PlayServices(private var activity: Activity, private var buttonGoogle: Ima
             )
             .addOnSuccessListener { leaderboardData ->
                 leaderboardData.get()?.scores?.get(0)?.let { scoreResult ->
-                    // Update the local high score if the leaderboards high score is greater
                     if (scoreResult.rawScore > prefs.highScore) {
+                        // Update the local high score if the leaderboards high score is greater
                         prefs.highScore = scoreResult.rawScore
+                    } else if (prefs.highScore > scoreResult.rawScore) {
+                        // If the local high score is greater, submit the score to the leaderboards
+                        saveToLeaderboards(prefs.highScore)
                     }
                 }
             }
@@ -126,11 +145,10 @@ class PlayServices(private var activity: Activity, private var buttonGoogle: Ima
 
     fun openLeaderboards() {
         if (signedInAccount == null) {
-            // Prompt the user to sign in if they want to access the leaderboards
-            refusedSignIn = false
-            startSignInIntent()
+            // Prompt the user to sign in if they want to access the leaderboards, then open if successful
+            signInSilently(withPrompt = true, withLeaderboard = true)
         } else {
-            // Open the Google Play leaderboards
+            // Open the Play Games leaderboards
             Games.getLeaderboardsClient(context, signedInAccount!!)
                 .getLeaderboardIntent(context.getString(R.string.leaderboard_id))
                 .addOnSuccessListener { intent ->
@@ -155,10 +173,8 @@ class PlayServices(private var activity: Activity, private var buttonGoogle: Ima
 
                 if (signInResult?.isSuccess == true) {
                     // The signed in account is stored in the result.
-                    signedInAccount = signInResult.signInAccount
-                    buttonGoogle.contentDescription = context.getString(R.string.sign_out)
-                    Toast.makeText(context, "Signed in to Google", Toast.LENGTH_SHORT).show()
-                    updateHighScoreFromLeaderboards()
+                    val openLeaderboard = data.extras?.getBoolean(leaderboardIntentKey) ?: false
+                    onSignedIn(signInResult.signInAccount!!, openLeaderboard)
                 } else {
                     // Show a toast message that the user failed to sign in
                     var message = signInResult?.status?.statusMessage
@@ -171,8 +187,8 @@ class PlayServices(private var activity: Activity, private var buttonGoogle: Ima
                 }
             }
         } else {
-            Toast.makeText(context, "Failed to sign in to Google", Toast.LENGTH_SHORT).show()
-            refusedSignIn = true
+            Toast.makeText(context, "Failed to sign in Google Play Games", Toast.LENGTH_SHORT).show()
+            println(result)
         }
     }
 
@@ -185,8 +201,7 @@ class PlayServices(private var activity: Activity, private var buttonGoogle: Ima
             println("Data: ${result.data}")
         } else {
             Toast.makeText(
-                context,
-                "Failed to show the leaderboards. Are you signed in?",
+                context, "Failed to show the leaderboards. Are you signed in?",
                 Toast.LENGTH_SHORT
             ).show()
         }
