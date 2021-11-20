@@ -1,4 +1,4 @@
-package com.example.minibrainage
+package com.abhi.minibrainage
 
 import android.content.Context
 import android.content.SharedPreferences

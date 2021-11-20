@@ -1,4 +1,4 @@
-package com.example.minibrainage
+package com.abhi.minibrainage
 
 import android.graphics.Color
 import android.os.Build
@@ -12,8 +12,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.drawToBitmap
-import com.example.minibrainage.databinding.ActivityMainBinding
-import com.example.minibrainage.databinding.PopupPlayAgainBinding
+import com.abhi.minibrainage.databinding.ActivityMainBinding
+import com.abhi.minibrainage.databinding.PopupPlayAgainBinding
 import kotlin.math.floor
 import kotlin.math.roundToInt
 
