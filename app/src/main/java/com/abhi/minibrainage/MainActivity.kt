@@ -55,8 +55,8 @@ class MainActivity : AppCompatActivity() {
 
         // Initialize the UI elements
         layoutPage = binding.layoutPage
-        val buttonClassify = binding.buttonClassify
-        val buttonReset = binding.buttonReset
+        val buttonSubmit = binding.buttonSubmit
+        val buttonClear = binding.buttonClear
         textViewTimer = binding.textViewTimer
         textViewScore = binding.textViewScore
         textViewMath = binding.textViewMath
@@ -123,7 +123,7 @@ class MainActivity : AppCompatActivity() {
             println("Failed to set up digit classifier: ${err.localizedMessage}")
         }
 
-        buttonClassify.setOnClickListener {
+        buttonSubmit.setOnClickListener {
             // Classify the number drawn
             if (digitClassifier.isInitialized && !gameOver) {
                 digitClassifier.classifyAsync(canvasView.drawToBitmap())
@@ -168,11 +168,9 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        buttonReset.setOnClickListener {
+        buttonClear.setOnClickListener {
             // Clear the canvas
             canvasView.clear()
-            // Generate a new equation
-            generateRandomEquation()
         }
 
         // Create a 1-minute timer

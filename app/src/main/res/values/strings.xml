@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Brain Smarts</string>
-    <string name="button_classify">Classify</string>
-    <string name="button_reset">Reset</string>
+    <string name="button_submit">Submit</string>
+    <string name="button_clear">Clear</string>
     <string name="time">Time: %1$d:%2$02d</string>
     <string name="sign_in">Sign In</string>
     <string name="sign_out">Sign Out</string>

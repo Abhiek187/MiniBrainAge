@@ -9,29 +9,29 @@
     tools:context=".MainActivity">
 
     <Button
-        android:id="@+id/buttonClassify"
+        android:id="@+id/buttonSubmit"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
         android:background="#8BC34A"
-        android:text="@string/button_classify"
-        app:layout_constraintEnd_toStartOf="@+id/buttonReset"
+        android:text="@string/button_submit"
+        app:layout_constraintEnd_toStartOf="@+id/buttonClear"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/buttonReset"
+        android:id="@+id/buttonClear"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:background="#FF5722"
-        android:text="@string/button_reset"
-        app:layout_constraintBaseline_toBaselineOf="@+id/buttonClassify"
+        android:text="@string/button_clear"
+        app:layout_constraintBaseline_toBaselineOf="@+id/buttonSubmit"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/buttonClassify" />
+        app:layout_constraintStart_toEndOf="@+id/buttonSubmit" />
 
     <TextView
         android:id="@+id/textViewTimer"
@@ -41,7 +41,7 @@
         android:layout_marginTop="16dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Display1"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/buttonClassify"
+        app:layout_constraintTop_toBottomOf="@+id/buttonSubmit"
         tools:text="Time: 1:00" />
 
     <ImageButton
@@ -55,7 +55,7 @@
         android:scaleType="fitCenter"
         app:layout_constraintEnd_toStartOf="@+id/textViewScore"
         app:layout_constraintStart_toEndOf="@+id/textViewTimer"
-        app:layout_constraintTop_toBottomOf="@+id/buttonClassify"
+        app:layout_constraintTop_toBottomOf="@+id/buttonSubmit"
         app:srcCompat="@drawable/googleg_disabled_color_18" />
 
     <TextView
