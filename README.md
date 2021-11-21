@@ -1,6 +1,6 @@
-# Mini Brain Age
+# Brain Smarts
 
-<img src="demo.gif" alt="Mini Brain Age demo" width="250px">
+<img src="demo.gif" alt="Brain Smarts demo" width="250px">
 
 Inspired by Brain Age, this Android game tests players' math knowledge by hand drawing numbers and quickly solving math problems. A key feature of this app is that it uses on-device machine learning to interpret handwritten digits. This is done by feeding the MNIST dataset into a neural network created in TensorFlow Lite.
 

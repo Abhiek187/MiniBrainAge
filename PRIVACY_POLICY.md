@@ -1,6 +1,6 @@
-## Mini Brain Age: Privacy policy
+## Brain Smarts: Privacy policy
 
-Welcome to the Mini Brain Age app for Android!
+Welcome to the Brain Smarts app for Android!
 
 This is an open source Android app developed by Abhishek Chaudhuri. The source code is available on GitHub; the app is also available on Google Play.
 
