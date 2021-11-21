@@ -17,7 +17,7 @@ class PlayServices(private var activity: Activity, private var buttonGoogle: Ima
     private val context = activity.applicationContext
     private val prefs = SharedPrefs(context)
     private var signedInAccount: GoogleSignInAccount? = null
-    private val leaderboardIntentKey = "openLeaderboards"
+    private var openLeaderboard = false
 
     init {
         buttonGoogle.setOnClickListener {
@@ -30,7 +30,7 @@ class PlayServices(private var activity: Activity, private var buttonGoogle: Ima
         }
     }
 
-    private fun onSignedIn(account: GoogleSignInAccount, openLeaderboard: Boolean) {
+    private fun onSignedIn(account: GoogleSignInAccount) {
         // Tasks to perform when the user is signed in
         signedInAccount = account
         // Show in color that the user signed in
@@ -49,10 +49,11 @@ class PlayServices(private var activity: Activity, private var buttonGoogle: Ima
         if (openLeaderboard) {
             // To be called if the user signs in after tapping the leaderboards button
             openLeaderboards()
+            openLeaderboard = false
         }
     }
 
-    fun signInSilently(withPrompt: Boolean=false, withLeaderboard: Boolean=false) {
+    fun signInSilently(withPrompt: Boolean=false) {
         // Sign in to Google in the background, intervene if necessary
         val signInOptions = GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN
         val account = GoogleSignIn.getLastSignedInAccount(context)
@@ -60,31 +61,30 @@ class PlayServices(private var activity: Activity, private var buttonGoogle: Ima
         if (GoogleSignIn.hasPermissions(account, *signInOptions.scopeArray)) {
             // Already signed in.
             // The signed in account is stored in the 'account' variable.
-            onSignedIn(account!!, withLeaderboard)
+            onSignedIn(account!!)
         } else {
             // Haven't been signed-in before. Try the silent sign-in first.
             val signInClient = GoogleSignIn.getClient(context, signInOptions)
             signInClient.silentSignIn().addOnCompleteListener(activity) { task ->
                 if (task.isSuccessful) {
                     // The signed in account is stored in the task's result.
-                    onSignedIn(task.result, withLeaderboard)
+                    onSignedIn(task.result)
                 } else if (withPrompt) {
                     /* If the user can't be signed in automatically, don't prompt them unless they
                      * want to view the leaderboards or press the sign-in button
                      */
-                    startSignInIntent(withLeaderboard)
+                    startSignInIntent()
                 }
             }
         }
     }
 
-    private fun startSignInIntent(openLeaderboard: Boolean) {
+    private fun startSignInIntent() {
         val signInClient = GoogleSignIn.getClient(
             context,
             GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN
         )
         val intent = signInClient.signInIntent
-        intent.putExtra(leaderboardIntentKey, openLeaderboard)
         signInResultLauncher.launch(intent)
     }
 
@@ -118,7 +118,11 @@ class PlayServices(private var activity: Activity, private var buttonGoogle: Ima
                 maxResults
             )
             .addOnSuccessListener { leaderboardData ->
-                leaderboardData.get()?.scores?.get(0)?.let { scoreResult ->
+                val scores = leaderboardData.get()?.scores
+                // Check if there is a leaderboard score
+                if (scores != null && scores.count > 0) {
+                    val scoreResult = scores[0]
+
                     if (scoreResult.rawScore > prefs.highScore) {
                         // Update the local high score if the leaderboards high score is greater
                         prefs.highScore = scoreResult.rawScore
@@ -146,7 +150,8 @@ class PlayServices(private var activity: Activity, private var buttonGoogle: Ima
     fun openLeaderboards() {
         if (signedInAccount == null) {
             // Prompt the user to sign in if they want to access the leaderboards, then open if successful
-            signInSilently(withPrompt = true, withLeaderboard = true)
+            openLeaderboard = true
+            signInSilently(withPrompt = true)
         } else {
             // Open the Play Games leaderboards
             Games.getLeaderboardsClient(context, signedInAccount!!)
@@ -173,8 +178,7 @@ class PlayServices(private var activity: Activity, private var buttonGoogle: Ima
 
                 if (signInResult?.isSuccess == true) {
                     // The signed in account is stored in the result.
-                    val openLeaderboard = data.extras?.getBoolean(leaderboardIntentKey) ?: false
-                    onSignedIn(signInResult.signInAccount!!, openLeaderboard)
+                    onSignedIn(signInResult.signInAccount!!)
                 } else {
                     // Show a toast message that the user failed to sign in
                     var message = signInResult?.status?.statusMessage
@@ -187,7 +191,7 @@ class PlayServices(private var activity: Activity, private var buttonGoogle: Ima
                 }
             }
         } else {
-            Toast.makeText(context, "Failed to sign in Google Play Games", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Failed to sign in to Google Play Games", Toast.LENGTH_SHORT).show()
             println(result)
         }
     }
@@ -196,14 +200,8 @@ class PlayServices(private var activity: Activity, private var buttonGoogle: Ima
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         // The leaderboards intent doesn't return any data
-        if (result.resultCode == Activity.RESULT_OK) {
-            println("Successfully opened the leaderboards!")
-            println("Data: ${result.data}")
-        } else {
-            Toast.makeText(
-                context, "Failed to show the leaderboards. Are you signed in?",
-                Toast.LENGTH_SHORT
-            ).show()
-        }
+        // Activity.RESULT_CANCELED would normally occur when exiting the leaderboards
+        println("Leaderboards result code: ${result.resultCode}")
+        println("Leaderboards result data: ${result.data}")
     }
 }
