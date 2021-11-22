@@ -7,6 +7,7 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.view.MotionEvent
 import android.view.View
+import android.util.TypedValue
 
 class CanvasView(context: Context): View(context) {
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -14,8 +15,11 @@ class CanvasView(context: Context): View(context) {
 
     init {
         paint.style = Paint.Style.STROKE
-        paint.strokeWidth = 70f
         paint.color = Color.WHITE
+        // Scale the stroke width with the device's size
+        paint.strokeWidth = TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP, 20f, resources.displayMetrics
+        )
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
