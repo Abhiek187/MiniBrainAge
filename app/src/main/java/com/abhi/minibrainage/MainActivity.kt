@@ -228,6 +228,13 @@ class MainActivity : AppCompatActivity() {
         timer?.start()
     }
 
+    // All the possible operations to calculate the answer
+    enum class Op {
+        ADD,
+        SUBTRACT,
+        MULTIPLY
+    }
+
     private fun generateRandomEquation() {
         /* Start with an equation: a op b = c,
          * where a is in [-99, 99], op is in {+, -, *}, and b is in [0, 9].
@@ -239,9 +246,15 @@ class MainActivity : AppCompatActivity() {
         answer = (0..9).random() // 0-9
         val c: Int
 
-        textViewMath.text = when ((0..2).random()) {
-            0 -> {
-                // op = '+'
+        // If a = 0, don't multiply since dividing by 0 is invalid
+        val op = if (a == 0) {
+            Op.values().filterNot { it == Op.MULTIPLY }.random() // + or -
+        } else {
+            Op.values().random() // +, -, or *
+        }
+
+        textViewMath.text = when (op) {
+            Op.ADD -> {
                 c = a + answer
                 if (a >= 0) {
                     getString(R.string.equation, c, '-', a, '?')
@@ -249,8 +262,7 @@ class MainActivity : AppCompatActivity() {
                     getString(R.string.equation, c, '+', -a, '?')
                 }
             }
-            1 -> {
-                // op = '-'
+            Op.SUBTRACT -> {
                 c = a - answer
                 if (c >= 0) {
                     getString(R.string.equation, a, '-', c, '?')
@@ -259,7 +271,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             else -> {
-                // op = '*'
                 c = a * answer
                 getString(R.string.equation, c, '/', a, '?')
             }
