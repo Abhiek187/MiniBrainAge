@@ -103,14 +103,14 @@ class MainActivity : AppCompatActivity() {
         constraintSet.connect(
             canvasView.id,
             ConstraintSet.TOP,
-            textViewTimer.id,
+            textViewMath.id,
             ConstraintSet.BOTTOM,
             8
         )
         constraintSet.connect(
             canvasView.id,
             ConstraintSet.BOTTOM,
-            textViewMath.id,
+            buttonSubmit.id,
             ConstraintSet.TOP,
             8
         )
