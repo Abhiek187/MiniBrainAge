@@ -120,12 +120,25 @@ class MainActivity : AppCompatActivity() {
 
         // Initialize the digit classifier
         digitClassifier.initialize().addOnFailureListener { err ->
-            println("Failed to set up digit classifier: ${err.localizedMessage}")
+            Toast.makeText(
+                this, "Failed to set up digit classifier: ${err.localizedMessage}",
+                Toast.LENGTH_SHORT
+            ).show()
         }
 
         buttonSubmit.setOnClickListener {
             // Classify the number drawn
             if (digitClassifier.isInitialized && !gameOver) {
+                /* To prevent users from spamming the submit button, only count attempts where the
+                 * user drew something on the canvas
+                 */
+                if (canvasView.skipped()) {
+                    // Skip the question, clear the canvas, and generate a new equation
+                    canvasView.clear()
+                    generateRandomEquation()
+                    return@setOnClickListener
+                }
+
                 digitClassifier.classifyAsync(canvasView.drawToBitmap())
                     .addOnSuccessListener { result ->
                         val (num1, conf1) = result[0]

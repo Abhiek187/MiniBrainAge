@@ -12,6 +12,7 @@ import android.util.TypedValue
 class CanvasView(context: Context): View(context) {
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private var path = Path()
+    private var touchCount = 0
 
     init {
         paint.style = Paint.Style.STROKE
@@ -31,6 +32,7 @@ class CanvasView(context: Context): View(context) {
             }
         }
 
+        touchCount++
         invalidate()
         performClick()
         return true
@@ -48,6 +50,12 @@ class CanvasView(context: Context): View(context) {
 
     fun clear() {
         path = Path()
+        touchCount = 0
         invalidate()
+    }
+
+    fun skipped(): Boolean {
+        // Returns true if the user tapped submit without drawing anything
+        return touchCount < 10
     }
 }
