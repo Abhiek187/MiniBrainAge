@@ -4,6 +4,8 @@
 
 Inspired by Brain Age, this Android game tests players' math knowledge by hand drawing numbers and quickly solving math problems. A key feature of this app is that it uses on-device machine learning to interpret handwritten digits. This is done by feeding the MNIST dataset into a neural network created in TensorFlow Lite.
 
+With a Play Games account, players can upload their high score to the leaderboards.
+
 ## The Neural Network
 
 The neural network was created using Keras and its design is based on the [LeNet](https://www.kaggle.com/blurredmachine/lenet-architecture-a-complete-guide) convolutional architecture for handwritten character recognition. The following describes each layer:
