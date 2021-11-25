@@ -1,15 +1,16 @@
 <resources>
     <string name="app_name">Brain Smarts</string>
-    <string name="button_submit">Submit</string>
-    <string name="button_clear">Clear</string>
     <string name="time">Time: %1$d:%2$02d</string>
     <string name="time_start">Time: 0:00</string>
-    <string name="sign_in">Sign In</string>
-    <string name="sign_out">Sign Out</string>
     <string name="score">Score: %1$d</string>
     <string name="equation">%1$d %2$s %3$d = %4$s</string>
     <string name="correct">Correct</string>
     <string name="wrong">Wrong</string>
+    <string name="draw_here">Draw here to answer the question</string>
+    <string name="button_submit">Submit</string>
+    <string name="button_clear">Clear</string>
+    <string name="sign_in">Sign In</string>
+    <string name="sign_out">Sign Out</string>
     <!-- Popup -->
     <string name="times_up">Time\'s Up!</string>
     <string name="high_score">High Score: %1$d</string>

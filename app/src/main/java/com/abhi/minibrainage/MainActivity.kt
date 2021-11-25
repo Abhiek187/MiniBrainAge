@@ -63,6 +63,7 @@ class MainActivity : AppCompatActivity() {
         textViewScore = binding.textViewScore
         textViewMath = binding.textViewMath
         val imageViewCheck = binding.imageViewCheck
+        val drawIcon = binding.imageViewDrawIcon
 
         oldTextColor = textViewTimer.currentTextColor
         textViewScore.text = getString(R.string.score, score) // show initial score
@@ -77,6 +78,7 @@ class MainActivity : AppCompatActivity() {
 
         // Add a CanvasView to the ConstraintLayout
         canvasView = CanvasView(this)
+        canvasView.drawIcon = drawIcon
         canvasView.id = View.generateViewId() // generate id to apply constraints
         canvasView.setBackgroundColor(Color.BLACK)
         layoutPage.addView(canvasView)
@@ -326,6 +328,7 @@ class MainActivity : AppCompatActivity() {
         // Don't let the user tap outside the area until they hit start
         buttonStart.setOnClickListener {
             restartGame(popupWindow)
+            canvasView.didStart = true
         }
     }
 

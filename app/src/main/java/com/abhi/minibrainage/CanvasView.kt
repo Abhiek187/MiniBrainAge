@@ -8,11 +8,16 @@ import android.graphics.Path
 import android.view.MotionEvent
 import android.view.View
 import android.util.TypedValue
+import android.widget.ImageView
 
 class CanvasView(context: Context): View(context) {
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private var path = Path()
     private var touchCount = 0
+    var didStart = false // will be true when the game starts
+    private var didTouch = false
+    // Will be initialized in MainActivity
+    lateinit var drawIcon: ImageView
 
     init {
         paint.style = Paint.Style.STROKE
@@ -30,6 +35,12 @@ class CanvasView(context: Context): View(context) {
             } MotionEvent.ACTION_MOVE -> {
                 path.lineTo(event.x, event.y)
             }
+        }
+
+        if (didStart && !didTouch) {
+            // Hide the drawing icon once the player starts drawing
+            drawIcon.visibility = GONE
+            didTouch = true
         }
 
         touchCount++

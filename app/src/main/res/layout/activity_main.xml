@@ -53,6 +53,25 @@
         app:layout_constraintTop_toBottomOf="@+id/textViewScore"
         app:srcCompat="@android:drawable/checkbox_on_background" />
 
+    <ImageView
+        android:id="@+id/imageViewDrawIcon"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:contentDescription="@string/draw_here"
+        android:elevation="1dp"
+        android:scaleX="0.5"
+        android:scaleY="0.5"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@android:drawable/ic_menu_edit" />
+
     <Button
         android:id="@+id/buttonSubmit"
         android:layout_width="0dp"
