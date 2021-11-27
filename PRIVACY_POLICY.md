@@ -1,4 +1,4 @@
-## Brain Smarts: Privacy policy
+## Brain Smarts: Privacy Policy
 
 Welcome to the Brain Smarts app for Android!
 
