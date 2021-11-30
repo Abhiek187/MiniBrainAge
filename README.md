@@ -1,10 +1,12 @@
 # Brain Smarts
 
+<img src="demo.gif" alt="Brain Smarts demo" width="250px">
+
 <a target="_blank" rel="noopener noreferrer" href="https://play.google.com/store/apps/details?id=com.abhi.minibrainage&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1">
     <img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" width="250px"/>
 </a>
 
-<img src="demo.gif" alt="Brain Smarts demo" width="250px">
+## About
 
 Inspired by Brain Age, this Android game tests players' math knowledge by hand drawing numbers and quickly solving math problems. With a Play Games account, players can upload their high scores to the leaderboards.
 
