@@ -26,6 +26,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var textViewTimer: TextView
     private lateinit var textViewScore: TextView
     private lateinit var textViewMath: TextView
+    private var popupWindow: PopupWindow? = null
 
     // Timer variables
     private var timer: CountDownTimer? = null
@@ -212,6 +213,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         digitClassifier.close() // stop the classifier before closing the app
+        // Dismiss the popup window if it's present to prevent memory leaks
+        popupWindow?.dismiss()
+        popupWindow = null
         super.onDestroy()
     }
 
@@ -294,47 +298,46 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun showPopup(popupView: ViewBinding): PopupWindow {
+    private fun showPopup(popupView: ViewBinding) {
         // Show the popup at the center of the screen
         val width = LinearLayout.LayoutParams.MATCH_PARENT
         val height = LinearLayout.LayoutParams.WRAP_CONTENT
-        val popupWindow = PopupWindow(popupView.root, width, height)
+        popupWindow = PopupWindow(popupView.root, width, height)
 
         // If starting the app, wait until the main layout has initialized
         layoutPage.post {
-            popupWindow.showAtLocation(layoutPage, Gravity.CENTER, 0, 0)
+            popupWindow?.showAtLocation(layoutPage, Gravity.CENTER, 0, 0)
         }
-
-        return popupWindow
     }
 
-    private fun restartGame(popupWindow: PopupWindow) {
+    private fun restartGame() {
         // Reset the game
         canvasView.clear()
         generateRandomEquation()
         score = 0
 
         gameOver = false
-        popupWindow.dismiss()
+        popupWindow?.dismiss()
+        popupWindow = null
         startTimer(startTime) // restart the timer
     }
 
     private fun showPopupStart() {
         val popupView = PopupStartBinding.inflate(layoutInflater)
-        val popupWindow = showPopup(popupView)
+        showPopup(popupView)
 
         val buttonStart = popupView.imageButtonStart
 
         // Don't let the user tap outside the area until they hit start
         buttonStart.setOnClickListener {
-            restartGame(popupWindow)
+            restartGame()
             canvasView.didStart = true
         }
     }
 
     private fun showPopupPlayAgain() {
         val popupView = PopupPlayAgainBinding.inflate(layoutInflater)
-        val popupWindow = showPopup(popupView)
+        showPopup(popupView)
 
         val textViewHighScore = popupView.textViewHighScore
         val buttonPlayAgain = popupView.imageButtonPlayAgain
@@ -362,7 +365,7 @@ class MainActivity : AppCompatActivity() {
 
         // Don't let the user tap outside the area until they play again
         buttonPlayAgain.setOnClickListener {
-            restartGame(popupWindow)
+            restartGame()
         }
 
         buttonLeaderboards.setOnClickListener {
