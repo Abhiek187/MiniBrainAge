@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion 31
+    compileSdkVersion 32
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -16,9 +16,9 @@ android {
     defaultConfig {
         applicationId "com.abhi.minibrainage"
         minSdkVersion 23
-        targetSdkVersion 31
-        versionCode 6
-        versionName "1.0.1"
+        targetSdkVersion 32
+        versionCode 7
+        versionName "1.0.2"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -38,6 +38,7 @@ android {
     androidResources {
         noCompress 'tflite'
     }
+    namespace 'com.abhi.minibrainage'
 }
 
 dependencies {
@@ -49,7 +50,7 @@ dependencies {
 
     implementation 'com.google.android.gms:play-services-tasks:18.0.1'
     implementation 'com.google.android.gms:play-services-games:22.0.1'
-    implementation 'com.google.android.gms:play-services-auth:20.1.0'
+    implementation 'com.google.android.gms:play-services-auth:20.2.0'
     implementation 'org.tensorflow:tensorflow-lite:2.7.0'
     implementation 'org.tensorflow:tensorflow-lite-support:0.3.0'
     implementation 'org.tensorflow:tensorflow-lite-metadata:0.3.0'
