@@ -1,5 +1,6 @@
 package com.abhi.minibrainage
 
+import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
@@ -21,6 +22,15 @@ import kotlin.math.floor
 import kotlin.math.roundToInt
 
 class MainActivity : AppCompatActivity() {
+    companion object {
+        // Bundle constants
+        const val BUNDLE_REMAINING_TIME = "remainingTime"
+        const val BUNDLE_SCORE = "score"
+        const val BUNDLE_EQUATION = "equation"
+        const val BUNDLE_ANSWER = "answer"
+        const val BUNDLE_GAME_OVER = "gameOver"
+    }
+
     // UI elements
     private lateinit var layoutPage: ConstraintLayout
     private lateinit var canvasView: CanvasView
@@ -75,8 +85,18 @@ class MainActivity : AppCompatActivity() {
         digitClassifier = DigitClassifier(this)
         playServices = PlayServices(this, binding.imageButtonGoogle)
 
-        // Generate a random math equation to solve
-        generateRandomEquation()
+        if (savedInstanceState == null) {
+            // Generate a random math equation to solve
+            generateRandomEquation()
+        } else {
+            // Load the saved game state
+            remainingTime = savedInstanceState.getLong(BUNDLE_REMAINING_TIME)
+            resumeTime = remainingTime
+            score = savedInstanceState.getLong(BUNDLE_SCORE)
+            textViewMath.text = savedInstanceState.getString(BUNDLE_EQUATION)
+            answer = savedInstanceState.getInt(BUNDLE_ANSWER)
+            gameOver = savedInstanceState.getBoolean(BUNDLE_GAME_OVER)
+        }
 
         // Add a CanvasView to the ConstraintLayout
         canvasView = CanvasView(this)
@@ -88,17 +108,33 @@ class MainActivity : AppCompatActivity() {
         // Make CanvasView square, height = phone width - margins, middle of screen
         val constraintSet = ConstraintSet()
         constraintSet.clone(layoutPage)
+        // Differ the constraints based on the screen's orientation
+        val orientation = resources.configuration.orientation
+
         // Set width and height to match constraint
         constraintSet.constrainWidth(canvasView.id, 0)
         constraintSet.constrainHeight(canvasView.id, 0)
-        // Put view in the middle of the screen
-        constraintSet.connect(
-            canvasView.id,
-            ConstraintSet.START,
-            layoutPage.id,
-            ConstraintSet.START,
-            8
-        )
+
+        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+            // Put view in the middle of the screen
+            constraintSet.connect(
+                canvasView.id,
+                ConstraintSet.START,
+                layoutPage.id,
+                ConstraintSet.START,
+                8
+            )
+        } else {
+            // Put view to the right of the screen
+            constraintSet.connect(
+                canvasView.id,
+                ConstraintSet.START,
+                buttonSubmit.id,
+                ConstraintSet.END,
+                8
+            )
+        }
+
         constraintSet.connect(
             canvasView.id,
             ConstraintSet.END,
@@ -192,8 +228,28 @@ class MainActivity : AppCompatActivity() {
             canvasView.clear()
         }
 
-        // Show the start screen
-        showPopupStart()
+        if (!gameOver) {
+            // Resume the game
+            startTimer(remainingTime)
+            canvasView.didStart = true
+        } else if (remainingTime < startTime) {
+            // Show the play again screen
+            showPopupPlayAgain()
+        } else {
+            // Show the start screen
+            showPopupStart()
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
+        // Save the current game state before the screen rotates
+        outState.putLong(BUNDLE_REMAINING_TIME, remainingTime)
+        outState.putLong(BUNDLE_SCORE, score)
+        outState.putString(BUNDLE_EQUATION, textViewMath.text.toString())
+        outState.putInt(BUNDLE_ANSWER, answer)
+        outState.putBoolean(BUNDLE_GAME_OVER, gameOver)
     }
 
     override fun onPause() {
@@ -316,6 +372,7 @@ class MainActivity : AppCompatActivity() {
     private fun restartGame() {
         // Reset the game
         canvasView.clear()
+        canvasView.didStart = true
         generateRandomEquation()
         score = 0
 
@@ -334,7 +391,6 @@ class MainActivity : AppCompatActivity() {
         // Don't let the user tap outside the area until they hit start
         buttonStart.setOnClickListener {
             restartGame()
-            canvasView.didStart = true
         }
     }
 
