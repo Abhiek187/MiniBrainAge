@@ -1,6 +1,5 @@
 package com.abhi.minibrainage
 
-import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
@@ -11,7 +10,6 @@ import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.core.view.drawToBitmap
 import androidx.viewbinding.ViewBinding
@@ -103,62 +101,8 @@ class MainActivity : AppCompatActivity() {
         canvasView.drawIcon = drawIcon
         canvasView.id = View.generateViewId() // generate id to apply constraints
         canvasView.setBackgroundColor(Color.BLACK)
+        // Align the canvas with the draw icon
         layoutPage.addView(canvasView, drawIcon.layoutParams)
-
-        // Make CanvasView square, height = phone width - margins, middle of screen
-//        val constraintSet = ConstraintSet()
-//        constraintSet.clone(layoutPage)
-//        // Differ the constraints based on the screen's orientation
-//        val orientation = resources.configuration.orientation
-//
-//        // Set width and height to match constraint
-//        constraintSet.constrainWidth(canvasView.id, 0)
-//        constraintSet.constrainHeight(canvasView.id, 0)
-//
-//        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-//            // Put view in the middle of the screen
-//            constraintSet.connect(
-//                canvasView.id,
-//                ConstraintSet.START,
-//                layoutPage.id,
-//                ConstraintSet.START,
-//                8
-//            )
-//        } else {
-//            // Put view to the right of the screen and add constraints connecting to it
-//            constraintSet.connect(
-//                canvasView.id,
-//                ConstraintSet.START,
-//                buttonSubmit.id,
-//                ConstraintSet.END,
-//                8
-//            )
-//        }
-//
-//        constraintSet.connect(
-//            canvasView.id,
-//            ConstraintSet.END,
-//            layoutPage.id,
-//            ConstraintSet.END,
-//            8
-//        )
-//        constraintSet.connect(
-//            canvasView.id,
-//            ConstraintSet.TOP,
-//            textViewMath.id,
-//            ConstraintSet.BOTTOM,
-//            8
-//        )
-//        constraintSet.connect(
-//            canvasView.id,
-//            ConstraintSet.BOTTOM,
-//            buttonSubmit.id,
-//            ConstraintSet.TOP,
-//            8
-//        )
-//        // Make the canvas a square
-//        constraintSet.setDimensionRatio(canvasView.id, "1:1")
-//        constraintSet.applyTo(layoutPage)
 
         // Initialize the digit classifier
         digitClassifier.initialize().addOnFailureListener { err ->
