@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.text.Html
+import android.util.DisplayMetrics
 import android.view.Gravity
 import android.view.View
 import android.widget.*
@@ -359,9 +360,19 @@ class MainActivity : AppCompatActivity() {
 
     private fun showPopup(popupView: ViewBinding) {
         // Show the popup at the center of the screen
-        val width = LinearLayout.LayoutParams.MATCH_PARENT
+        val width = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            val windowMetrics = windowManager.currentWindowMetrics
+            windowMetrics.bounds.right
+        } else {
+            val displayMetrics = DisplayMetrics()
+            @Suppress("DEPRECATION")
+            windowManager.defaultDisplay.getMetrics(displayMetrics)
+            displayMetrics.widthPixels
+        }
+
         val height = LinearLayout.LayoutParams.WRAP_CONTENT
-        popupWindow = PopupWindow(popupView.root, width, height)
+        // Add margins on the sides of the popup window
+        popupWindow = PopupWindow(popupView.root, width - 50, height)
 
         // If starting the app, wait until the main layout has initialized
         layoutPage.post {
