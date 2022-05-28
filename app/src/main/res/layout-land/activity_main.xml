@@ -15,6 +15,7 @@
         android:layout_marginTop="16dp"
         android:text="@string/time_start"
         android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+        android:textSize="30sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -25,10 +26,11 @@
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+        android:textSize="30sp"
         app:layout_constraintBaseline_toBaselineOf="@+id/textViewTimer"
         app:layout_constraintEnd_toStartOf="@+id/imageViewDrawIcon"
         app:layout_constraintStart_toEndOf="@+id/textViewTimer"
-        tools:text="Score: 0" />
+        tools:text="Score: 100" />
 
     <TextView
         android:id="@+id/textViewMath"
@@ -37,15 +39,16 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Display2"
+        android:textSize="35sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textViewTimer"
-        tools:text="72 / 9 = ?" />
+        tools:text="891 / 99 = ?" />
 
     <ImageView
         android:id="@+id/imageViewCheck"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
@@ -54,7 +57,8 @@
         app:layout_constraintEnd_toStartOf="@+id/imageViewDrawIcon"
         app:layout_constraintStart_toEndOf="@+id/textViewMath"
         app:layout_constraintTop_toBottomOf="@+id/textViewScore"
-        app:srcCompat="@android:drawable/checkbox_on_background" />
+        app:srcCompat="@android:drawable/checkbox_on_background"
+        tools:visibility="visible" />
 
     <ImageView
         android:id="@+id/imageViewDrawIcon"
