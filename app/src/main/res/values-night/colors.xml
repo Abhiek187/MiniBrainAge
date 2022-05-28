@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#6200EE</color>
+    <color name="colorPrimaryDark">#3700B3</color>
+    <color name="colorAccent">#03DAC5</color>
+
+    <color name="colorBackground">#81B9BF</color>
+    <color name="colorBorder">#E3EEF1</color>
+    <color name="colorStart">#338A3E</color>
+    <color name="colorSubmit">#5A9216</color>
+    <color name="colorReset">#C41C00</color>
+    <color name="colorLowTime">#C20000</color>
+    <color name="colorRestart">#007AC1</color>
+    <color name="colorLeaderboards">#99AA00</color>
+</resources>

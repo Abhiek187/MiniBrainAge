@@ -11,6 +11,7 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.core.content.ContextCompat
 import androidx.core.view.drawToBitmap
 import androidx.viewbinding.ViewBinding
 import com.abhi.minibrainage.databinding.ActivityMainBinding
@@ -229,7 +230,9 @@ class MainActivity : AppCompatActivity() {
                 val minutes = seconds / 60
 
                 if (seconds <= 10) {
-                    textViewTimer.setTextColor(Color.RED)
+                    textViewTimer.setTextColor(
+                        ContextCompat.getColor(applicationContext, R.color.colorLowTime)
+                    )
                 }
 
                 textViewTimer.text = getString(R.string.time, minutes, seconds)

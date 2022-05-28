@@ -33,7 +33,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
         android:background="@drawable/round_button"
-        android:backgroundTint="#66BB6A"
+        android:backgroundTint="@color/colorStart"
         android:contentDescription="@string/play_again"
         android:minHeight="48dp"
         app:layout_constraintBottom_toBottomOf="parent"
