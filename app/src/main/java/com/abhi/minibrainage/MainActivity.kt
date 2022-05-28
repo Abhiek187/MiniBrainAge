@@ -5,7 +5,6 @@ import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
-import android.text.Html
 import android.util.DisplayMetrics
 import android.view.Gravity
 import android.view.View
@@ -410,27 +409,21 @@ class MainActivity : AppCompatActivity() {
         showPopup(popupView)
 
         val textViewHighScore = popupView.textViewHighScore
+        val textViewNewRecord = popupView.textViewNewRecord
         val buttonPlayAgain = popupView.imageButtonPlayAgain
         val buttonLeaderboards = popupView.imageButtonLeaderboards
 
         // Show the highest score in this session
         if (score > prefs.highScore) {
             textViewHighScore.text = getString(R.string.high_score, score)
-            // Make additional text red
-            if (Build.VERSION.SDK_INT < 24) {
-                @Suppress("DEPRECATION")
-                textViewHighScore.append(
-                    Html.fromHtml("&nbsp;<font color=\"red\">New record!</font>"))
-            } else {
-                textViewHighScore.append(
-                    Html.fromHtml("&nbsp;<font color=\"red\">New record!</font>",
-                        Html.FROM_HTML_MODE_COMPACT))
-            }
+            // Show the new record text
+            textViewNewRecord.visibility = View.VISIBLE
 
             prefs.highScore = score
             playServices.saveToLeaderboards(score)
         } else {
             textViewHighScore.text = getString(R.string.high_score, prefs.highScore)
+            textViewNewRecord.visibility = View.GONE
         }
 
         // Don't let the user tap outside the area until they play again
