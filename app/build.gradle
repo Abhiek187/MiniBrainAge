@@ -3,6 +3,7 @@ apply plugin: 'kotlin-android'
 
 android {
     compileSdkVersion 32
+    ndkVersion "24.0.8215888"
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -17,7 +18,7 @@ android {
         applicationId "com.abhi.minibrainage"
         minSdkVersion 23
         targetSdkVersion 32
-        versionCode 7
+        versionCode 9
         versionName "1.1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -25,8 +26,18 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            // Deobfuscation file located under:
+            // app/build/outputs/mapping/release/mapping.txt
+            // AAB: BUNDLE-METADATA/com.android.tools.build.obfuscation/proguard.map
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+
+            // Native debug symbols located under:
+            // app/build/outputs/native-debug-symbols/variant-name/native-debug-symbols.zip
+            // AAB: BUNDLE-METADATA/com.android.tools.build.debugsymbols
+            ndk {
+                debugSymbolLevel "FULL"
+            }
         }
     }
 
