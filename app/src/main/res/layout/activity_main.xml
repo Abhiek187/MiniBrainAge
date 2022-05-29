@@ -15,6 +15,7 @@
         android:layout_marginTop="16dp"
         android:text="@string/time_start"
         android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+        android:textSize="30sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -24,6 +25,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+        android:textSize="30sp"
         app:layout_constraintBaseline_toBaselineOf="@+id/textViewTimer"
         app:layout_constraintEnd_toEndOf="parent"
         tools:text="Score: 100" />
