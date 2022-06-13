@@ -13,6 +13,7 @@ captures/
 .externalNativeBuild/
 .cxx/
 *.apk
+# Ignore app/[build-variant]/app-[build-variant].aab
 *.aab
 output.json
 
