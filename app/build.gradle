@@ -30,6 +30,7 @@ android {
             // app/build/outputs/mapping/release/mapping.txt
             // AAB: BUNDLE-METADATA/com.android.tools.build.obfuscation/proguard.map
             minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 
             // Native debug symbols located under:
