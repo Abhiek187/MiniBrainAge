@@ -36,6 +36,7 @@ android {
             // Native debug symbols located under:
             // app/build/outputs/native-debug-symbols/variant-name/native-debug-symbols.zip
             // AAB: BUNDLE-METADATA/com.android.tools.build.debugsymbols
+            // Or follow: https://stackoverflow.com/a/68778908
             ndk {
                 debugSymbolLevel "FULL"
             }
