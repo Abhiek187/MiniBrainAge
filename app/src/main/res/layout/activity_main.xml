@@ -117,8 +117,10 @@
         android:minWidth="48dp"
         android:minHeight="48dp"
         android:scaleType="fitCenter"
+        android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:srcCompat="@drawable/googleg_disabled_color_18" />
+        app:srcCompat="@drawable/googleg_standard_color_18"
+        tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -123,10 +123,12 @@
         android:minWidth="48dp"
         android:minHeight="48dp"
         android:scaleType="fitCenter"
+        android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/imageViewDrawIcon"
         app:layout_constraintTop_toBottomOf="@+id/buttonSubmit"
         app:layout_constraintVertical_bias="0.100000024"
-        app:srcCompat="@drawable/googleg_disabled_color_18" />
+        app:srcCompat="@drawable/googleg_standard_color_18"
+        tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

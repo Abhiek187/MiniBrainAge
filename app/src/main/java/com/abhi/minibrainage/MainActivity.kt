@@ -205,7 +205,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        playServices.signInSilently()
 
         if (!gameOver) {
             startTimer(resumeTime) // resume with the same number of seconds remaining

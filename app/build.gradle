@@ -61,7 +61,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 
     implementation 'com.google.android.gms:play-services-tasks:18.0.2'
-    implementation 'com.google.android.gms:play-services-games:23.1.0'
+    implementation 'com.google.android.gms:play-services-games-v2:17.0.0'
     implementation 'com.google.android.gms:play-services-auth:20.4.0'
     implementation 'org.tensorflow:tensorflow-lite:2.7.0'
     implementation 'org.tensorflow:tensorflow-lite-support:0.3.0'

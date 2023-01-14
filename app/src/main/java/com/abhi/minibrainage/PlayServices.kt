@@ -1,116 +1,66 @@
 package com.abhi.minibrainage
 
+import android.annotation.SuppressLint
 import android.app.Activity
+import android.view.View
 import android.widget.ImageButton
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
-import com.google.android.gms.auth.api.Auth
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.games.Games
+import com.google.android.gms.games.*
 import com.google.android.gms.games.leaderboard.LeaderboardVariant
 
 class PlayServices(private var activity: Activity, private var buttonGoogle: ImageButton) {
     // Holds all methods related to Google Play Services
     private val context = activity.applicationContext
     private val prefs = SharedPrefs(context)
-    private var signedInAccount: GoogleSignInAccount? = null
+    private var isAuthenticated = false
     private var openLeaderboard = false
 
     init {
-        buttonGoogle.setOnClickListener {
-            // If the user is signed out, sign them in, otherwise sign them out
-            if (signedInAccount == null) {
-                signInSilently(withPrompt = true)
+        PlayGamesSdk.initialize(context)
+        val gamesSignInClient = PlayGames.getGamesSignInClient(activity)
+
+        gamesSignInClient.isAuthenticated.addOnCompleteListener { isAuthenticatedTask ->
+            isAuthenticated = isAuthenticatedTask.isSuccessful &&
+                    isAuthenticatedTask.result.isAuthenticated
+
+            if (isAuthenticated) {
+                // Continue with Play Games Services
+                // Hide the sign-in button
+                buttonGoogle.visibility = View.INVISIBLE
+                // Backup in case the popup doesn't show
+                Toast.makeText(context, "Signed in to Google Play Games", Toast.LENGTH_SHORT).show()
+
+                // Synchronize the local high score and the leaderboards high score
+                syncLeaderboardScore()
+
+                if (openLeaderboard) {
+                    // To be called if the user signs in after tapping the leaderboards button
+                    openLeaderboards()
+                    openLeaderboard = false
+                }
             } else {
-                signOut()
-            }
-        }
-    }
+                // Disable your integration with Play Games Services or show a
+                // login button to ask players to sign-in. Clicking it should
+                // call GamesSignInClient.signIn().
+                buttonGoogle.visibility = View.VISIBLE
 
-    private fun onSignedIn(account: GoogleSignInAccount) {
-        // Tasks to perform when the user is signed in
-        signedInAccount = account
-        // Show in color that the user signed in
-        buttonGoogle.setImageResource(R.drawable.googleg_standard_color_18)
-        buttonGoogle.contentDescription = context.getString(R.string.sign_out)
-
-        // Show a popup of the user connecting to Play Games
-        val gamesClient = Games.getGamesClient(context, account)
-        gamesClient.setViewForPopups(activity.findViewById(android.R.id.content))
-        // Backup in case the popup doesn't show
-        Toast.makeText(context, "Signed in to Google Play Games", Toast.LENGTH_SHORT).show()
-
-        // Synchronize the local high score and the leaderboards high score
-        syncLeaderboardScore()
-
-        if (openLeaderboard) {
-            // To be called if the user signs in after tapping the leaderboards button
-            openLeaderboards()
-            openLeaderboard = false
-        }
-    }
-
-    fun signInSilently(withPrompt: Boolean=false) {
-        // Sign in to Google in the background, intervene if necessary
-        val signInOptions = GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN
-        val account = GoogleSignIn.getLastSignedInAccount(context)
-
-        if (GoogleSignIn.hasPermissions(account, *signInOptions.scopeArray)) {
-            // Already signed in.
-            // The signed in account is stored in the 'account' variable.
-            onSignedIn(account!!)
-        } else {
-            // Haven't been signed-in before. Try the silent sign-in first.
-            val signInClient = GoogleSignIn.getClient(context, signInOptions)
-            signInClient.silentSignIn().addOnCompleteListener(activity) { task ->
-                if (task.isSuccessful) {
-                    // The signed in account is stored in the task's result.
-                    onSignedIn(task.result)
-                } else if (withPrompt) {
-                    /* If the user can't be signed in automatically, don't prompt them unless they
-                     * want to view the leaderboards or press the sign-in button
-                     */
-                    startSignInIntent()
+                buttonGoogle.setOnClickListener {
+                    gamesSignInClient.signIn()
                 }
             }
         }
     }
 
-    private fun startSignInIntent() {
-        val signInClient = GoogleSignIn.getClient(
-            context,
-            GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN
-        )
-        val intent = signInClient.signInIntent
-        signInResultLauncher.launch(intent)
-    }
-
-    private fun signOut() {
-        val signInClient = GoogleSignIn.getClient(
-            context,
-            GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN
-        )
-        signInClient.signOut().addOnCompleteListener(activity) {
-            // At this point, the user is signed out.
-            signedInAccount = null
-            // Fade the Google logo to show that the user isn't signed in
-            buttonGoogle.setImageResource(R.drawable.googleg_disabled_color_18)
-            buttonGoogle.contentDescription = context.getString(R.string.sign_in)
-            Toast.makeText(context, "Signed out of Google Play Games", Toast.LENGTH_SHORT).show()
-        }
-    }
-
+    @SuppressLint("VisibleForTests")
     private fun syncLeaderboardScore() {
         // Ensure that the local and leaderboards high score match
-        if (signedInAccount == null) return
         val maxResults = 1
         val leaderboardID = context.getString(R.string.leaderboard_id)
 
         // Get the player's high score from the leaderboards
-        Games.getLeaderboardsClient(context, signedInAccount!!)
+        PlayGames.getLeaderboardsClient(activity)
             .loadPlayerCenteredScores(
                 leaderboardID,
                 LeaderboardVariant.TIME_SPAN_ALL_TIME,
@@ -140,60 +90,21 @@ class PlayServices(private var activity: Activity, private var buttonGoogle: Ima
     fun saveToLeaderboards(score: Long) {
         // Save the score to the leaderboards
         // If the current leaderboard score is greater, the API call isn't made
-        signedInAccount?.let { account ->
-            Games.getLeaderboardsClient(context, account)
-                .submitScore(context.getString(R.string.leaderboard_id), score)
-            Toast.makeText(context, "High score saved to the leaderboards!", Toast.LENGTH_SHORT).show()
-        }
+        PlayGames.getLeaderboardsClient(activity)
+            .submitScore(context.getString(R.string.leaderboard_id), score)
+        Toast.makeText(context, "High score saved to the leaderboards!", Toast.LENGTH_SHORT).show()
     }
 
     fun openLeaderboards() {
-        if (signedInAccount == null) {
-            // Prompt the user to sign in if they want to access the leaderboards, then open if successful
-            openLeaderboard = true
-            signInSilently(withPrompt = true)
-        } else {
-            // Open the Play Games leaderboards
-            Games.getLeaderboardsClient(context, signedInAccount!!)
-                .getLeaderboardIntent(context.getString(R.string.leaderboard_id))
-                .addOnSuccessListener { intent ->
-                    leaderboardsResultLauncher.launch(intent)
-                }
-                .addOnFailureListener { err ->
-                    println("Failed to open the leaderboards: ${err.localizedMessage}")
-                }
-        }
-    }
-
-    private val signInResultLauncher = (activity as ComponentActivity).registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            // There are no request codes
-            val data = result.data
-            println("Request succeeded, data: $data")
-
-            if (data != null) {
-                val signInResult = Auth.GoogleSignInApi.getSignInResultFromIntent(data)
-
-                if (signInResult?.isSuccess == true) {
-                    // The signed in account is stored in the result.
-                    onSignedIn(signInResult.signInAccount!!)
-                } else {
-                    // Show a toast message that the user failed to sign in
-                    var message = signInResult?.status?.statusMessage
-
-                    if (message == null || message.isEmpty()) {
-                        message = "Sign-in failed"
-                    }
-
-                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-                }
+        // Open the Play Games leaderboards
+        PlayGames.getLeaderboardsClient(activity)
+            .getLeaderboardIntent(context.getString(R.string.leaderboard_id))
+            .addOnSuccessListener { intent ->
+                leaderboardsResultLauncher.launch(intent)
             }
-        } else {
-            Toast.makeText(context, "Failed to sign in to Google Play Games", Toast.LENGTH_SHORT).show()
-            println(result)
-        }
+            .addOnFailureListener { err ->
+                println("Failed to open the leaderboards: ${err.localizedMessage}")
+            }
     }
 
     private val leaderboardsResultLauncher = (activity as ComponentActivity).registerForActivityResult(
