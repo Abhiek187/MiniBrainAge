@@ -7,6 +7,8 @@ import android.widget.ImageButton
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.common.api.CommonStatusCodes
 import com.google.android.gms.games.*
 import com.google.android.gms.games.leaderboard.LeaderboardVariant
 
@@ -14,41 +16,57 @@ class PlayServices(private var activity: Activity, private var buttonGoogle: Ima
     // Holds all methods related to Google Play Services
     private val context = activity.applicationContext
     private val prefs = SharedPrefs(context)
+    private var gamesSignInClient: GamesSignInClient
     private var isAuthenticated = false
-    private var openLeaderboard = false
 
     init {
         PlayGamesSdk.initialize(context)
-        val gamesSignInClient = PlayGames.getGamesSignInClient(activity)
+        gamesSignInClient = PlayGames.getGamesSignInClient(activity)
 
         gamesSignInClient.isAuthenticated.addOnCompleteListener { isAuthenticatedTask ->
             isAuthenticated = isAuthenticatedTask.isSuccessful &&
                     isAuthenticatedTask.result.isAuthenticated
 
             if (isAuthenticated) {
-                // Continue with Play Games Services
-                // Hide the sign-in button
-                buttonGoogle.visibility = View.INVISIBLE
-                // Backup in case the popup doesn't show
-                Toast.makeText(context, "Signed in to Google Play Games", Toast.LENGTH_SHORT).show()
-
-                // Synchronize the local high score and the leaderboards high score
-                syncLeaderboardScore()
-
-                if (openLeaderboard) {
-                    // To be called if the user signs in after tapping the leaderboards button
-                    openLeaderboards()
-                    openLeaderboard = false
-                }
+                onSignedIn(openLeaderboard = false)
             } else {
-                // Disable your integration with Play Games Services or show a
-                // login button to ask players to sign-in. Clicking it should
-                // call GamesSignInClient.signIn().
+                // Couldn't sign in using a default account, so show the sign-in button
                 buttonGoogle.visibility = View.VISIBLE
 
                 buttonGoogle.setOnClickListener {
-                    gamesSignInClient.signIn()
+                    signInManually(openLeaderboard = false)
                 }
+            }
+        }
+    }
+
+    private fun onSignedIn(openLeaderboard: Boolean) {
+        // Hide the sign-in button
+        buttonGoogle.visibility = View.INVISIBLE
+        // Backup in case the Play Games popup doesn't show
+        Toast.makeText(context, "Signed in to Google Play Games", Toast.LENGTH_SHORT).show()
+
+        // Synchronize the local high score and the leaderboards high score
+        syncLeaderboardScore()
+
+        if (openLeaderboard) {
+            // To be called if the user signs in after tapping the leaderboards button
+            openLeaderboards()
+        }
+    }
+
+    private fun signInManually(openLeaderboard: Boolean) {
+        gamesSignInClient.signIn().addOnCompleteListener { isAuthenticatedTask ->
+            isAuthenticated = isAuthenticatedTask.isSuccessful &&
+                    isAuthenticatedTask.result.isAuthenticated
+
+            if (isAuthenticated) {
+                onSignedIn(openLeaderboard)
+            } else {
+                Toast.makeText(
+                    context, "Failed to sign in to Google", Toast.LENGTH_SHORT
+                ).show()
+                println(isAuthenticatedTask.exception?.localizedMessage)
             }
         }
     }
@@ -83,11 +101,15 @@ class PlayServices(private var activity: Activity, private var buttonGoogle: Ima
                 }
             }
             .addOnFailureListener { err ->
-                println("Failed to retrieve high score from leaderboard: ${err.localizedMessage}")
+                // https://developers.google.com/android/reference/com/google/android/gms/common/api/CommonStatusCodes
+                val statusCode = (err as ApiException).statusCode
+                val errorString = CommonStatusCodes.getStatusCodeString(statusCode)
+                println("Failed to retrieve high score from leaderboard: $errorString")
             }
     }
 
     fun saveToLeaderboards(score: Long) {
+        if (!isAuthenticated) return
         // Save the score to the leaderboards
         // If the current leaderboard score is greater, the API call isn't made
         PlayGames.getLeaderboardsClient(activity)
@@ -96,15 +118,24 @@ class PlayServices(private var activity: Activity, private var buttonGoogle: Ima
     }
 
     fun openLeaderboards() {
-        // Open the Play Games leaderboards
-        PlayGames.getLeaderboardsClient(activity)
-            .getLeaderboardIntent(context.getString(R.string.leaderboard_id))
-            .addOnSuccessListener { intent ->
-                leaderboardsResultLauncher.launch(intent)
-            }
-            .addOnFailureListener { err ->
-                println("Failed to open the leaderboards: ${err.localizedMessage}")
-            }
+        if (!isAuthenticated) {
+            // Prompt the user to sign in if they want to access the leaderboards, then open if successful
+            signInManually(openLeaderboard = true)
+        } else {
+            // Open the Play Games leaderboards
+            PlayGames.getLeaderboardsClient(activity)
+                .getLeaderboardIntent(context.getString(R.string.leaderboard_id))
+                .addOnSuccessListener { intent ->
+                    leaderboardsResultLauncher.launch(intent)
+                }
+                .addOnFailureListener { err ->
+                    val statusCode = (err as ApiException).statusCode
+                    val errorString = CommonStatusCodes.getStatusCodeString(statusCode)
+                    Toast.makeText(
+                        context, "Failed to open the leaderboards: $errorString", Toast.LENGTH_SHORT
+                    ).show()
+                }
+        }
     }
 
     private val leaderboardsResultLauncher = (activity as ComponentActivity).registerForActivityResult(
