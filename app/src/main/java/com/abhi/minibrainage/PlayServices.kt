@@ -28,19 +28,19 @@ class PlayServices(private var activity: Activity, private var buttonGoogle: Ima
                     isAuthenticatedTask.result.isAuthenticated
 
             if (isAuthenticated) {
-                onSignedIn(openLeaderboard = false)
+                onSignedIn()
             } else {
                 // Couldn't sign in using a default account, so show the sign-in button
                 buttonGoogle.visibility = View.VISIBLE
 
                 buttonGoogle.setOnClickListener {
-                    signInManually(openLeaderboard = false)
+                    signInManually()
                 }
             }
         }
     }
 
-    private fun onSignedIn(openLeaderboard: Boolean) {
+    private fun onSignedIn(openLeaderboard: Boolean = false) {
         // Hide the sign-in button
         buttonGoogle.visibility = View.INVISIBLE
         // Backup in case the Play Games popup doesn't show
@@ -55,7 +55,7 @@ class PlayServices(private var activity: Activity, private var buttonGoogle: Ima
         }
     }
 
-    private fun signInManually(openLeaderboard: Boolean) {
+    private fun signInManually(openLeaderboard: Boolean = false) {
         gamesSignInClient.signIn().addOnCompleteListener { isAuthenticatedTask ->
             isAuthenticated = isAuthenticatedTask.isSuccessful &&
                     isAuthenticatedTask.result.isAuthenticated
