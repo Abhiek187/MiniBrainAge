@@ -15,13 +15,13 @@ A key feature of this app is that it uses on-device machine learning to interpre
 ## The Neural Network
 
 The neural network was created using Keras and its design is based on the [LeNet](https://www.kaggle.com/blurredmachine/lenet-architecture-a-complete-guide) convolutional architecture for handwritten character recognition. The following describes each layer:
-- Input: 1x28x28
+- Input: 1x28x28 (start with a 28x28 px grayscale drawing of the number)
 - Conv1: 1x28x28 input, 32 3x3 filters → 32x26x26 output (ReLU activation)
 - Conv2: 32x26x26 input, 64 3x3 filters → 64x24x24 output (ReLU activation)
 - MaxPool: 64x24x24 input, 2x2 filter, stride 2 → 64x12x12 output
 - Dropout: 25%
 - Flatten: 64x12x12 input → 9216 layers
-- Dense: 9216 layers → 10 layers (softmax activation)
+- Dense: 9216 layers → 10 layers (softmax activation, classify the number from 0-9)
 
 Because players can draw anywhere on the canvas, data augmentation was used to improve the accuracy of the model—namely rotation, width & height shift, shear, and zoom. The model was trained for 5 epochs and was compressed to a TFLite file using quantization.
 
