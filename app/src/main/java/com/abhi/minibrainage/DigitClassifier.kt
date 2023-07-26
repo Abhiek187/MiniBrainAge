@@ -53,7 +53,7 @@ class DigitClassifier(private val context: Context) {
         // For some reason, it doesn't work on Android S
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
             && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-            options.setUseNNAPI(true)
+            options.useNNAPI = true
         }
 
         val interpreter = Interpreter(model, options)
