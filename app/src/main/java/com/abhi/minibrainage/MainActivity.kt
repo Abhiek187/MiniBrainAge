@@ -271,9 +271,9 @@ class MainActivity : AppCompatActivity() {
 
         // If a = 0, don't multiply since dividing by 0 is invalid
         val op = if (a == 0) {
-            Op.values().filterNot { it == Op.MULTIPLY }.random() // + or -
+            Op.entries.filterNot { it == Op.MULTIPLY }.random() // + or -
         } else {
-            Op.values().random() // +, -, or *
+            Op.entries.toTypedArray().random() // +, -, or *
         }
 
         textViewMath.text = when (op) {
