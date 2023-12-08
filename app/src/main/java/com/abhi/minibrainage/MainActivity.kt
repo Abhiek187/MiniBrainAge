@@ -314,7 +314,7 @@ class MainActivity : AppCompatActivity() {
 
         val height = LinearLayout.LayoutParams.WRAP_CONTENT
         // Add margins on the sides of the popup window
-        popupWindow = PopupWindow(popupView.root, width - 50, height)
+        popupWindow = PopupWindow(popupView.root, (width * 0.8).toInt(), height)
 
         // If starting the app, wait until the main layout has initialized
         layoutPage.post {
