@@ -16,6 +16,7 @@ import androidx.viewbinding.ViewBinding
 import com.abhi.minibrainage.databinding.ActivityMainBinding
 import com.abhi.minibrainage.databinding.PopupPlayAgainBinding
 import com.abhi.minibrainage.databinding.PopupStartBinding
+import java.util.Locale
 import kotlin.math.floor
 import kotlin.math.roundToInt
 
@@ -150,8 +151,16 @@ class MainActivity : AppCompatActivity() {
 
                         imageViewCheck.visibility = View.VISIBLE
                         // See exact classification results (for debugging purposes)
-                        val confStr1 = String.format("%.2f", conf1 * 100)
-                        val confStr2 = String.format("%.2f", conf2 * 100)
+                        val confStr1 = String.format(
+                            Locale.getDefault(),
+                            "%.2f",
+                            conf1 * 100
+                        )
+                        val confStr2 = String.format(
+                            Locale.getDefault(),
+                            "%.2f",
+                            conf2 * 100
+                        )
                         println("That's either $num1 ($confStr1%) or $num2 ($confStr2%).")
                         // Clear the canvas
                         canvasView.clear()
