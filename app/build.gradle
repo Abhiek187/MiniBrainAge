@@ -56,10 +56,10 @@ android {
 
 dependencies {
     implementation 'androidx.core:core-ktx:1.13.1'
-    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 
-    implementation 'com.google.android.gms:play-services-games-v2:20.0.0'
+    implementation 'com.google.android.gms:play-services-games-v2:20.1.0'
     implementation 'org.tensorflow:tensorflow-lite:2.16.1'
 
     testImplementation 'junit:junit:4.13.2'
