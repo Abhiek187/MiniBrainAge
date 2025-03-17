@@ -5,6 +5,7 @@ import android.content.res.AssetManager
 import android.graphics.Bitmap
 import android.os.Build
 import android.util.Log
+import androidx.core.graphics.scale
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.TaskCompletionSource
 import org.tensorflow.lite.Interpreter
@@ -85,12 +86,7 @@ class DigitClassifier(private val context: Context) {
         check(isInitialized) { "TF Lite Interpreter is not initialized yet." }
 
         // Pre-processing: resize the input image to match the model input shape.
-        val resizedImage = Bitmap.createScaledBitmap(
-            bitmap,
-            inputImageWidth,
-            inputImageHeight,
-            true
-        )
+        val resizedImage = bitmap.scale(inputImageWidth, inputImageHeight)
         val byteBuffer = convertBitmapToByteBuffer(resizedImage)
 
         // Define an array to store the model output.
