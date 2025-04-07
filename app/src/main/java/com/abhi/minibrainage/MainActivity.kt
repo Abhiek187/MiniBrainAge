@@ -16,6 +16,7 @@ import androidx.viewbinding.ViewBinding
 import com.abhi.minibrainage.databinding.ActivityMainBinding
 import com.abhi.minibrainage.databinding.PopupPlayAgainBinding
 import com.abhi.minibrainage.databinding.PopupStartBinding
+import com.google.android.play.core.review.ReviewManagerFactory
 import java.util.Locale
 import kotlin.math.floor
 import kotlin.math.roundToInt
@@ -60,6 +61,7 @@ class MainActivity : AppCompatActivity() {
     private var answer = 0
     private var gameOver = true
     private lateinit var playServices: PlayServices
+    private val gamesToPresentReview = 3
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -378,6 +380,9 @@ class MainActivity : AppCompatActivity() {
             textViewNewRecord.visibility = View.GONE
         }
 
+        prefs.gamesPlayed++
+        presentReviewIfQualified()
+
         // Don't let the user tap outside the area until they play again
         buttonPlayAgain.setOnClickListener {
             restartGame()
@@ -385,6 +390,35 @@ class MainActivity : AppCompatActivity() {
 
         buttonLeaderboards.setOnClickListener {
             playServices.openLeaderboards()
+        }
+    }
+
+    private fun presentReviewIfQualified() {
+        // If the user played enough games, ask for a review
+        // Only ask once per app version to avoid intimidating the user
+        // and quickly reaching the quota
+        val gamesPlayed = prefs.gamesPlayed
+        val lastVersionReviewed = prefs.lastVersionReviewed
+        val currentVersion = BuildConfig.VERSION_CODE
+        if (gamesPlayed < gamesToPresentReview || currentVersion <= lastVersionReviewed) return
+
+        val reviewManager = ReviewManagerFactory.create(applicationContext)
+        val request = reviewManager.requestReviewFlow()
+
+        request.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val reviewInfo = task.result
+                val flow = reviewManager.launchReviewFlow(this, reviewInfo)
+
+                flow.addOnCompleteListener {
+                    // The user may or may not have reviewed or was prompted to review
+                    prefs.lastVersionReviewed = currentVersion
+                }
+            } else {
+                println(
+                    "Failed to request for a review: ${task.exception?.localizedMessage}"
+                )
+            }
         }
     }
 }
