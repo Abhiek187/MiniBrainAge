@@ -4,7 +4,7 @@ apply plugin: 'kotlin-android'
 android {
     namespace 'com.abhi.minibrainage'
     compileSdk 35
-    ndkVersion "27.2.12479018"
+    ndkVersion "28.1.13356709"
 
     java {
         toolchain {
@@ -16,8 +16,8 @@ android {
         applicationId "com.abhi.minibrainage"
         minSdkVersion 23
         targetSdkVersion 35
-        versionCode 12
-        versionName "1.2.2"
+        versionCode 13
+        versionName "1.2.3"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -55,7 +55,7 @@ android {
 dependencies {
     def googlePlayVersion = '2.0.2'
 
-    implementation 'androidx.core:core-ktx:1.15.0'
+    implementation 'androidx.core:core-ktx:1.16.0'
     implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
 
