@@ -2,9 +2,9 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 
 android {
-    namespace 'com.abhi.minibrainage'
-    compileSdk 35
-    ndkVersion "28.1.13356709"
+    namespace = 'com.abhi.minibrainage'
+    compileSdk = 36
+    ndkVersion = "28.1.13356709"
 
     java {
         toolchain {
@@ -15,7 +15,7 @@ android {
     defaultConfig {
         applicationId "com.abhi.minibrainage"
         minSdkVersion 23
-        targetSdkVersion 35
+        targetSdkVersion 36
         versionCode 13
         versionName "1.2.3"
 
@@ -28,7 +28,7 @@ android {
             // app/build/outputs/mapping/release/mapping.txt
             // AAB: BUNDLE-METADATA/com.android.tools.build.obfuscation/proguard.map
             minifyEnabled true
-            shrinkResources true
+            shrinkResources = true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 
             // Native debug symbols located under:
@@ -36,15 +36,15 @@ android {
             // AAB: BUNDLE-METADATA/com.android.tools.build.debugsymbols
             // Or follow: https://stackoverflow.com/a/68778908
             ndk {
-                debugSymbolLevel "FULL"
+                debugSymbolLevel = "FULL"
             }
         }
     }
 
     buildFeatures {
-        viewBinding true
-        mlModelBinding true
-        buildConfig true
+        viewBinding = true
+        mlModelBinding = true
+        buildConfig = true
     }
 
     androidResources {
@@ -56,11 +56,11 @@ dependencies {
     def googlePlayVersion = '2.0.2'
 
     implementation 'androidx.core:core-ktx:1.16.0'
-    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
 
-    implementation 'com.google.android.gms:play-services-games-v2:20.1.2'
-    implementation 'org.tensorflow:tensorflow-lite:2.16.1'
+    implementation 'com.google.android.gms:play-services-games-v2:21.0.0'
+    implementation 'org.tensorflow:tensorflow-lite:2.17.0'
     implementation "com.google.android.play:review:$googlePlayVersion"
     implementation "com.google.android.play:review-ktx:$googlePlayVersion"
 
