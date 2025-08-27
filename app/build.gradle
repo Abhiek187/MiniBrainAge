@@ -4,7 +4,7 @@ apply plugin: 'kotlin-android'
 android {
     namespace = 'com.abhi.minibrainage'
     compileSdk = 36
-    ndkVersion = "28.1.13356709"
+    ndkVersion = "28.2.13676358"
 
     java {
         toolchain {
@@ -16,8 +16,8 @@ android {
         applicationId "com.abhi.minibrainage"
         minSdkVersion 23
         targetSdkVersion 36
-        versionCode 13
-        versionName "1.2.3"
+        versionCode 14
+        versionName "1.2.4"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -55,16 +55,17 @@ android {
 dependencies {
     def googlePlayVersion = '2.0.2'
 
-    implementation 'androidx.core:core-ktx:1.16.0'
+    implementation 'androidx.core:core-ktx:1.17.0'
     implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
 
     implementation 'com.google.android.gms:play-services-games-v2:21.0.0'
-    implementation 'org.tensorflow:tensorflow-lite:2.17.0'
+    // TensorFlow Lite --> LiteRT (Lite Runtime)
+    implementation 'com.google.ai.edge.litert:litert:1.4.0'
     implementation "com.google.android.play:review:$googlePlayVersion"
     implementation "com.google.android.play:review-ktx:$googlePlayVersion"
 
     testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
+    androidTestImplementation 'androidx.test.ext:junit:1.3.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.7.0'
 }
