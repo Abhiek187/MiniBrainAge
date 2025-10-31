@@ -53,6 +53,7 @@ android {
 }
 
 dependencies {
+    def liteRTVersion = '16.4.0'
     def googlePlayVersion = '2.0.2'
 
     implementation 'androidx.core:core-ktx:1.17.0'
@@ -61,7 +62,8 @@ dependencies {
 
     implementation 'com.google.android.gms:play-services-games-v2:21.0.0'
     // TensorFlow Lite --> LiteRT (Lite Runtime)
-    implementation 'com.google.ai.edge.litert:litert:1.4.0'
+    implementation "com.google.android.gms:play-services-tflite-java:$liteRTVersion"
+    implementation "com.google.android.gms:play-services-tflite-gpu:$liteRTVersion"
     implementation "com.google.android.play:review:$googlePlayVersion"
     implementation "com.google.android.play:review-ktx:$googlePlayVersion"
 

@@ -5,6 +5,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.DisplayMetrics
+import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.widget.*
@@ -23,6 +24,8 @@ import kotlin.math.roundToInt
 
 class MainActivity : AppCompatActivity() {
     companion object {
+        const val TAG = "MainActivity"
+
         // Bundle constants
         const val BUNDLE_REMAINING_TIME = "remainingTime"
         const val BUNDLE_SCORE = "score"
@@ -109,6 +112,7 @@ class MainActivity : AppCompatActivity() {
 
         // Initialize the digit classifier
         digitClassifier.initialize().addOnFailureListener { err ->
+            Log.e(TAG, "Failed to set up digit classifier", err)
             Toast.makeText(
                 this, "Failed to set up digit classifier: ${err.localizedMessage}",
                 Toast.LENGTH_SHORT
@@ -163,7 +167,7 @@ class MainActivity : AppCompatActivity() {
                             "%.2f",
                             conf2 * 100
                         )
-                        println("That's either $num1 ($confStr1%) or $num2 ($confStr2%).")
+                        Log.d(TAG, "That's either $num1 ($confStr1%) or $num2 ($confStr2%).")
                         // Clear the canvas
                         canvasView.clear()
                         // Generate a new equation
@@ -415,9 +419,7 @@ class MainActivity : AppCompatActivity() {
                     prefs.lastVersionReviewed = currentVersion
                 }
             } else {
-                println(
-                    "Failed to request for a review: ${task.exception?.localizedMessage}"
-                )
+                Log.w(TAG, "Failed to request for a review", task.exception)
             }
         }
     }

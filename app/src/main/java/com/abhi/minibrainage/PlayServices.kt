@@ -2,6 +2,7 @@ package com.abhi.minibrainage
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.util.Log
 import android.view.View
 import android.widget.ImageButton
 import android.widget.Toast
@@ -18,6 +19,10 @@ class PlayServices(private var activity: Activity, private var buttonGoogle: Ima
     private val prefs = SharedPrefs(context)
     private var gamesSignInClient: GamesSignInClient
     private var isAuthenticated = false
+
+    companion object {
+        const val TAG = "PlayServices"
+    }
 
     init {
         PlayGamesSdk.initialize(context)
@@ -66,7 +71,7 @@ class PlayServices(private var activity: Activity, private var buttonGoogle: Ima
                 Toast.makeText(
                     context, "Failed to sign in to Google", Toast.LENGTH_SHORT
                 ).show()
-                println(isAuthenticatedTask.exception?.localizedMessage)
+                Log.w(TAG, "Failed to sign in to Google", isAuthenticatedTask.exception)
             }
         }
     }
@@ -104,7 +109,7 @@ class PlayServices(private var activity: Activity, private var buttonGoogle: Ima
                 // https://developers.google.com/android/reference/com/google/android/gms/common/api/CommonStatusCodes
                 val statusCode = (err as ApiException).statusCode
                 val errorString = CommonStatusCodes.getStatusCodeString(statusCode)
-                println("Failed to retrieve high score from leaderboard: $errorString")
+                Log.w(TAG, "Failed to retrieve high score from leaderboard: $errorString")
             }
     }
 
@@ -143,7 +148,7 @@ class PlayServices(private var activity: Activity, private var buttonGoogle: Ima
     ) { result ->
         // The leaderboards intent doesn't return any data
         // Activity.RESULT_CANCELED would normally occur when exiting the leaderboards
-        println("Leaderboards result code: ${result.resultCode}")
-        println("Leaderboards result data: ${result.data}")
+        Log.d(TAG, "Leaderboards result code: ${result.resultCode}")
+        Log.d(TAG, "Leaderboards result data: ${result.data}")
     }
 }

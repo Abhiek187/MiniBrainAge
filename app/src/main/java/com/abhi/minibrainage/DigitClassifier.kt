@@ -3,12 +3,15 @@ package com.abhi.minibrainage
 import android.content.Context
 import android.content.res.AssetManager
 import android.graphics.Bitmap
-import android.os.Build
 import android.util.Log
 import androidx.core.graphics.scale
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.TaskCompletionSource
-import org.tensorflow.lite.Interpreter
+import com.google.android.gms.tflite.client.TfLiteInitializationOptions
+import com.google.android.gms.tflite.gpu.support.TfLiteGpu
+import com.google.android.gms.tflite.java.TfLite
+import org.tensorflow.lite.InterpreterApi
+import org.tensorflow.lite.gpu.GpuDelegateFactory
 import java.io.FileInputStream
 import java.io.IOException
 import java.nio.ByteBuffer
@@ -18,7 +21,10 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 class DigitClassifier(private val context: Context) {
-    private var interpreter: Interpreter? = null
+    // LiteRT docs: https://ai.google.dev/edge/litert/android/java
+    private var interpreter: InterpreterApi? = null
+    private val useGpuTask = TfLiteGpu.isGpuDelegateAvailable(context)
+    private var isGpuAvailable = false
 
     var isInitialized = false
         private set
@@ -32,14 +38,23 @@ class DigitClassifier(private val context: Context) {
 
     fun initialize(): Task<Void> {
         val task = TaskCompletionSource<Void>()
-        executorService.execute {
-            try {
-                initializeInterpreter()
-                task.setResult(null)
-            } catch (e: IOException) {
-                task.setException(e)
-            }
+
+        // Initialize LiteRT with a GPU if available
+        useGpuTask.continueWithTask { task ->
+            isGpuAvailable = task.result
+            Log.d(TAG, "Is GPU available? $isGpuAvailable")
+
+            TfLite.initialize(context, TfLiteInitializationOptions.builder()
+                .setEnableGpuDelegateSupport(isGpuAvailable)
+                .build()
+            )
+        }.addOnSuccessListener {
+            initializeInterpreter()
+            task.setResult(null)
+        }.addOnFailureListener { e ->
+            task.setException(e)
         }
+
         return task.task
     }
 
@@ -48,26 +63,21 @@ class DigitClassifier(private val context: Context) {
         // Load the TF Lite model from the assets folder.
         val assetManager = context.assets
         val model = loadModelFile(assetManager, "mnist.tflite")
-        val options = Interpreter.Options()
+        val options = InterpreterApi.Options()
+            .setRuntime(InterpreterApi.Options.TfLiteRuntime.FROM_SYSTEM_ONLY)
 
-        // Initialize interpreter with NNAPI delegate for Android Pie or above
-        // For some reason, it doesn't work on Android S
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
-            && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-            options.useNNAPI = true
+        if (isGpuAvailable) {
+            options.addDelegateFactory(GpuDelegateFactory())
         }
-
-        val interpreter = Interpreter(model, options)
+        interpreter = InterpreterApi.create(model, options)
 
         // Read input shape from model file
-        val inputShape = interpreter.getInputTensor(0).shape()
+        val inputShape = interpreter!!.getInputTensor(0).shape()
         inputImageWidth = inputShape[1]
         inputImageHeight = inputShape[2]
         modelInputSize = FLOAT_TYPE_SIZE * inputImageWidth * inputImageHeight * PIXEL_SIZE
 
         // Finish interpreter initialization
-        this.interpreter = interpreter
-
         isInitialized = true
         Log.d(TAG, "Initialized TFLite interpreter.")
     }
@@ -79,7 +89,11 @@ class DigitClassifier(private val context: Context) {
         val fileChannel = inputStream.channel
         val startOffset = fileDescriptor.startOffset
         val declaredLength = fileDescriptor.declaredLength
-        return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength)
+        return fileChannel.map(
+            FileChannel.MapMode.READ_ONLY,
+            startOffset,
+            declaredLength
+        )
     }
 
     private fun classify(bitmap: Bitmap): List<Pair<Int, Float>> {
@@ -122,7 +136,8 @@ class DigitClassifier(private val context: Context) {
         byteBuffer.order(ByteOrder.nativeOrder())
 
         val pixels = IntArray(inputImageWidth * inputImageHeight)
-        bitmap.getPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
+        bitmap.getPixels(pixels, 0, bitmap.width, 0, 0,
+            bitmap.width, bitmap.height)
 
         for (pixelValue in pixels) {
             val r = (pixelValue shr 16 and 0xFF)
