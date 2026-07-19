@@ -2,6 +2,9 @@
 .gradle/
 build/
 
+# Kotlin compilation data
+.kotlin/
+
 # Local configuration file (sdk path, etc)
 local.properties
 
@@ -13,7 +16,6 @@ captures/
 .externalNativeBuild/
 .cxx/
 *.apk
-# Ignore app/[build-variant]/app-[build-variant].aab
 *.aab
 output.json
 
