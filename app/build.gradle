@@ -55,7 +55,7 @@ dependencies {
     def liteRTVersion = '16.5.0'
     def googlePlayVersion = '2.0.2'
 
-    implementation 'androidx.core:core-ktx:1.18.0'
+    implementation 'androidx.core:core-ktx:1.19.0'
     implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
 
