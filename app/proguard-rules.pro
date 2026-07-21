@@ -19,3 +19,12 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 -renamesourcefileattribute SourceFile
+
+# Fixes a bug where TF Lite fails to get the system or application interpreter using reflection
+# See: https://github.com/Abhiek187/MiniBrainAge/wiki/Post-Mortem-1.2.5-15:-The-TF-Lite-Google-Play-Services-runtime-fiasco
+-keep class com.google.android.gms.tflite.InterpreterFactoryImpl {
+    <init>();
+}
+-keep class org.tensorflow.lite.InterpreterFactoryImpl {
+    <init>();
+}

@@ -64,7 +64,7 @@ class DigitClassifier(private val context: Context) {
         val assetManager = context.assets
         val model = loadModelFile(assetManager, "mnist.tflite")
         val options = InterpreterApi.Options()
-            .setRuntime(InterpreterApi.Options.TfLiteRuntime.FROM_SYSTEM_ONLY)
+            .setRuntime(InterpreterApi.Options.TfLiteRuntime.PREFER_SYSTEM_OVER_APPLICATION)
 
         if (isGpuAvailable) {
             options.addDelegateFactory(GpuDelegateFactory())

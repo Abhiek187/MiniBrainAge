@@ -15,8 +15,8 @@ android {
         applicationId "com.abhi.minibrainage"
         minSdkVersion 23
         targetSdkVersion 37
-        versionCode 15
-        versionName "1.2.5"
+        versionCode 18
+        versionName "1.2.6"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -61,6 +61,8 @@ dependencies {
 
     implementation 'com.google.android.gms:play-services-games-v2:21.0.0'
     // TensorFlow Lite --> LiteRT (Lite Runtime)
+    // Fallback to the standalone library in case the Play Services runtime isn't supported
+    implementation 'com.google.ai.edge.litert:litert:1.4.2' // GPU delegates don't work in V2
     implementation "com.google.android.gms:play-services-tflite-java:$liteRTVersion"
     implementation "com.google.android.gms:play-services-tflite-gpu:$liteRTVersion"
     implementation "com.google.android.play:review:$googlePlayVersion"
