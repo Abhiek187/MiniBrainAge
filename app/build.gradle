@@ -13,7 +13,7 @@ android {
 
     defaultConfig {
         applicationId "com.abhi.minibrainage"
-        minSdkVersion 23
+        minSdkVersion 24
         targetSdkVersion 37
         versionCode 18
         versionName "1.2.6"
@@ -55,11 +55,11 @@ dependencies {
     def liteRTVersion = '16.5.0'
     def googlePlayVersion = '2.0.2'
 
-    implementation 'androidx.core:core-ktx:1.19.0'
-    implementation 'androidx.appcompat:appcompat:1.7.1'
-    implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
+    implementation 'androidx.core:core-ktx:1.19.1'
+    implementation 'androidx.appcompat:appcompat:1.8.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.2.2'
 
-    implementation 'com.google.android.gms:play-services-games-v2:21.0.0'
+    implementation 'com.google.android.gms:play-services-games-v2:22.1.0'
     // TensorFlow Lite --> LiteRT (Lite Runtime)
     // Fallback to the standalone library in case the Play Services runtime isn't supported
     implementation 'com.google.ai.edge.litert:litert:1.4.2' // GPU delegates don't work in V2
